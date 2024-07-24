@@ -20,7 +20,7 @@ namespace lv
 	private:
 		LvWindow lvWindow{ "The Vulkan", WIDTH, HEIGHT};
 		LvDevice lvDevice{lvWindow};
-		LvSwapChain lvSwapChain{ lvDevice, lvWindow.getExtent() };
+		LvSwapChain lvSwapChain{ lvDevice, lvWindow };
 		VkPipelineLayout pipelineLayout;
 		std::unique_ptr<LvPipeline> lvPipeline;
 		std::vector<VkCommandBuffer> commandBuffers;
@@ -37,6 +37,9 @@ namespace lv
 		void createPipeline();
 		void createPipelineLayout();
 		void createCommandBuffers();
+		void freeCommandBuffers();
+		void recreateCommandBuffers();
+		void recordCommandBuffers(uint32_t imageIndex);
 		void drawFrame();
 		void loadModel();
 	};

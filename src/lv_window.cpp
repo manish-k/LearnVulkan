@@ -22,7 +22,6 @@ namespace lv
 		glfwInit();
 
 		glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-		glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 
 		window = glfwCreateWindow(
 			width, 
@@ -47,6 +46,11 @@ namespace lv
 		glfwPollEvents();
 	}
 
+	void LvWindow::waitEvents()
+	{
+		glfwWaitEvents();
+	}
+
 	void LvWindow::createWindowSurface(
 		VkInstance instance,
 		VkSurfaceKHR* surface)
@@ -58,9 +62,23 @@ namespace lv
 
 	VkExtent2D LvWindow::getExtent() 
 	{ 
+		int width, height;
+		glfwGetFramebufferSize(window, &width, &height);
+		
 		return { 
 			static_cast<uint32_t>(width), 
 			static_cast<uint32_t>(height) 
 		}; 
+	}
+
+	void LvWindow::framebufferResizeCallback(
+		GLFWwindow* window,
+		int width,
+		int height)
+	{
+		auto currentWindow = 
+			reinterpret_cast<LvWindow*>(glfwGetWindowUserPointer(window));
+
+		currentWindow->resized = true;
 	}
 }

@@ -3,6 +3,7 @@
 #include "vulkan/vulkan.h"
 
 #include "lv_device.hpp"
+#include "lv_window.hpp"
 
 #include <vector>
 
@@ -15,7 +16,7 @@ namespace lv
 
 	private:
 		LvDevice& device;
-		VkExtent2D windowExtent;
+		LvWindow& window;
 		
 		VkSwapchainKHR swapChain;
 		VkFormat swapChainImageFormat;
@@ -33,7 +34,7 @@ namespace lv
 		size_t currentFrame = 0;
 
 	public:
-		LvSwapChain(LvDevice& device, VkExtent2D extent);
+		LvSwapChain(LvDevice& device, LvWindow& window);
 		~LvSwapChain();
 
 		LvSwapChain(const LvSwapChain&) = delete;
@@ -48,9 +49,11 @@ namespace lv
 		VkResult submitCommandBuffers(
 			const VkCommandBuffer* buffers, 
 			uint32_t* imageIndex);
+		void recreateSwapChain();
 
 	private:
 		void createSwapChain();
+		void cleanupSwapChain();
 		void createImageViews();
 		void createRenderPass();
 		void createFramebuffers();

@@ -2,8 +2,8 @@
 
 namespace lv
 {
-	LvSwapChain::LvSwapChain(LvDevice& device, VkExtent2D extent)
-		: device{ device }, windowExtent{ extent }
+	LvSwapChain::LvSwapChain(LvDevice& device, LvWindow& window)
+		: device{ device }, window{ window }
 	{
 		createSwapChain();
 		createImageViews();
@@ -15,17 +15,9 @@ namespace lv
 	LvSwapChain::~LvSwapChain()
 	{
 		VkDevice ldevice = device.getLogicalDevice();
-		for (auto framebuffer : swapChainFramebuffers) {
-			vkDestroyFramebuffer(ldevice, framebuffer, nullptr);
-		}
 
-
-		for (auto imageView : swapChainImageViews) {
-			vkDestroyImageView(ldevice, imageView, nullptr);
-		}
-
+		cleanupSwapChain();
 		vkDestroyRenderPass(ldevice, renderPass, nullptr);
-		vkDestroySwapchainKHR(ldevice, swapChain, nullptr);
 
 		for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
 			vkDestroySemaphore(ldevice, renderFinishedSemaphores[i], nullptr);
@@ -101,6 +93,38 @@ namespace lv
 		vkGetSwapchainImagesKHR(device.getLogicalDevice(), swapChain, &imageCount, swapChainImages.data());
 	}
 
+	void LvSwapChain::recreateSwapChain()
+	{
+		auto extent = window.getExtent();
+		while (extent.width == 0 || extent.height == 0) {
+			extent = window.getExtent();
+			window.waitEvents();
+		}
+
+		vkDeviceWaitIdle(device.getLogicalDevice());
+
+		cleanupSwapChain();
+
+		createSwapChain();
+		createImageViews();
+		createFramebuffers();
+	}
+
+	void LvSwapChain::cleanupSwapChain()
+	{
+		VkDevice ldevice = device.getLogicalDevice();
+		for (auto framebuffer : swapChainFramebuffers) {
+			vkDestroyFramebuffer(ldevice, framebuffer, nullptr);
+		}
+
+
+		for (auto imageView : swapChainImageViews) {
+			vkDestroyImageView(ldevice, imageView, nullptr);
+		}
+
+		vkDestroySwapchainKHR(ldevice, swapChain, nullptr);
+	}
+
 	VkSurfaceFormatKHR LvSwapChain::chooseSwapSurfaceFormat(
 		const std::vector<VkSurfaceFormatKHR>& availableFormats)
 	{
@@ -129,7 +153,7 @@ namespace lv
 			return capabilities.currentExtent;
 		}
 		else {
-			VkExtent2D actualExtent = windowExtent;
+			VkExtent2D actualExtent = window.getExtent();
 			actualExtent.width = std::max(
 				capabilities.minImageExtent.width,
 				std::min(capabilities.maxImageExtent.width, actualExtent.width));

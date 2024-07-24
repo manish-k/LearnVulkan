@@ -10,13 +10,11 @@
 namespace lv
 {
 	struct PipelineConfigInfo {
-		VkViewport viewport;
-		VkRect2D scissor;
+		std::vector<VkDynamicState> dynamicStateEnables;
+		VkPipelineDynamicStateCreateInfo dynamicStatesInfo;
 		VkPipelineInputAssemblyStateCreateInfo inputAssemblyInfo;
 		VkPipelineRasterizationStateCreateInfo rasterizationInfo;
 		VkPipelineMultisampleStateCreateInfo multisampleInfo;
-		VkPipelineColorBlendAttachmentState colorBlendAttachment;
-		VkPipelineColorBlendStateCreateInfo colorBlendInfo;
 		VkPipelineDepthStencilStateCreateInfo depthStencilInfo;
 		VkRenderPass renderPass = nullptr;
 		VkPipelineLayout pipelineLayout = nullptr;

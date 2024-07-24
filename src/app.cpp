@@ -69,49 +69,81 @@ namespace lv
 		allocInfo.commandPool = lvDevice.getCommandPool();
 		allocInfo.commandBufferCount = static_cast<uint32_t>(commandBuffers.size());
 
-		if (vkAllocateCommandBuffers(lvDevice.getLogicalDevice(), 
-			&allocInfo, 
+		if (vkAllocateCommandBuffers(lvDevice.getLogicalDevice(),
+			&allocInfo,
 			commandBuffers.data()) !=
 			VK_SUCCESS) {
 			throw std::runtime_error("failed to allocate command buffers!");
 		}
+	}
 
-		for (int i = 0; i < commandBuffers.size(); i++) {
-			VkCommandBufferBeginInfo beginInfo{};
-			beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+	void App::freeCommandBuffers()
+	{
+		vkFreeCommandBuffers(
+			lvDevice.getLogicalDevice(),
+			lvDevice.getCommandPool(),
+			static_cast<uint32_t>(commandBuffers.size()),
+			commandBuffers.data());
+		commandBuffers.clear();
+	}
 
-			if (vkBeginCommandBuffer(commandBuffers[i], &beginInfo) != VK_SUCCESS) {
-				throw std::runtime_error("failed to begin recording command buffer!");
-			}
+	void App::recreateCommandBuffers()
+	{
+		freeCommandBuffers();
+		createCommandBuffers();
+	}
 
-			VkRenderPassBeginInfo renderPassInfo{};
-			renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-			renderPassInfo.renderPass = lvSwapChain.getRenderPass();
-			renderPassInfo.framebuffer = lvSwapChain.getFrameBuffer(i);
+	void App::recordCommandBuffers(uint32_t imageIndex)
+	{
+		VkCommandBufferBeginInfo beginInfo{};
+		beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
 
-			renderPassInfo.renderArea.offset = { 0, 0 };
-			renderPassInfo.renderArea.extent = lvSwapChain.getSwapChainExtent();
+		if (vkBeginCommandBuffer(commandBuffers[imageIndex], &beginInfo) != VK_SUCCESS) {
+			throw std::runtime_error("failed to begin recording command buffer!");
+		}
 
-			std::array<VkClearValue, 2> clearValues{};
-			clearValues[0].color = { 0.1f, 0.1f, 0.1f, 1.0f };
-			clearValues[1].depthStencil = { 1.0f, 0 };
-			renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
-			renderPassInfo.pClearValues = clearValues.data();
+		VkRenderPassBeginInfo renderPassInfo{};
+		renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+		renderPassInfo.renderPass = lvSwapChain.getRenderPass();
+		renderPassInfo.framebuffer = lvSwapChain.getFrameBuffer(imageIndex);
 
-			vkCmdBeginRenderPass(
-				commandBuffers[i], 
-				&renderPassInfo, 
-				VK_SUBPASS_CONTENTS_INLINE);
+		renderPassInfo.renderArea.offset = { 0, 0 };
+		renderPassInfo.renderArea.extent = lvSwapChain.getSwapChainExtent();
 
-			lvPipeline->bind(commandBuffers[i]);
-			lvModel->bind(commandBuffers[i]);
+		std::array<VkClearValue, 2> clearValues{};
+		clearValues[0].color = { 0.1f, 0.1f, 0.1f, 1.0f };
+		clearValues[1].depthStencil = { 1.0f, 0 };
+		renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
+		renderPassInfo.pClearValues = clearValues.data();
 
-			lvModel->draw(commandBuffers[i]);
+		vkCmdBeginRenderPass(
+			commandBuffers[imageIndex],
+			&renderPassInfo,
+			VK_SUBPASS_CONTENTS_INLINE);
 
-			vkCmdEndRenderPass(commandBuffers[i]);
-			if (vkEndCommandBuffer(commandBuffers[i]) != VK_SUCCESS) {
-				throw std::runtime_error("failed to record command buffer!");
-			}
+		lvPipeline->bind(commandBuffers[imageIndex]);
+
+		VkViewport viewport{};
+		viewport.x = 0.0f;
+		viewport.y = 0.0f;
+		viewport.width = static_cast<float>(lvSwapChain.getSwapChainExtent().width);
+		viewport.height = static_cast<float>(lvSwapChain.getSwapChainExtent().height);
+		viewport.minDepth = 0.0f;
+		viewport.maxDepth = 1.0f;
+		vkCmdSetViewport(commandBuffers[imageIndex], 0, 1, &viewport);
+
+		VkRect2D scissor{};
+		scissor.offset = { 0, 0 };
+		scissor.extent = lvSwapChain.getSwapChainExtent();
+		vkCmdSetScissor(commandBuffers[imageIndex], 0, 1, &scissor);
+
+		lvModel->bind(commandBuffers[imageIndex]);
+
+		lvModel->draw(commandBuffers[imageIndex]);
+
+		vkCmdEndRenderPass(commandBuffers[imageIndex]);
+		if (vkEndCommandBuffer(commandBuffers[imageIndex]) != VK_SUCCESS) {
+			throw std::runtime_error("failed to record command buffer!");
 		}
 	}
 
@@ -119,12 +151,32 @@ namespace lv
 	{
 		uint32_t imageIndex;
 		VkResult result = lvSwapChain.acquireNextImage(&imageIndex);
+		
+		if (result == VK_ERROR_OUT_OF_DATE_KHR)
+		{
+			lvSwapChain.recreateSwapChain();
+			recreateCommandBuffers();
+			return;
+		}
+		
 		if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR) {
 			throw std::runtime_error("failed to acquire swap chain image!");
 		}
 
+		recordCommandBuffers(imageIndex);
+
 		result = lvSwapChain.submitCommandBuffers(&commandBuffers[imageIndex], &imageIndex);
-		if (result != VK_SUCCESS) {
+
+		if (result == VK_ERROR_OUT_OF_DATE_KHR ||
+			result == VK_SUBOPTIMAL_KHR ||
+			lvWindow.isResized())
+		{
+			lvSwapChain.recreateSwapChain();
+			lvWindow.resetResizedState();
+			recreateCommandBuffers();
+		}
+		else if (result != VK_SUCCESS)
+		{
 			throw std::runtime_error("failed to present swap chain image!");
 		}
 	}
