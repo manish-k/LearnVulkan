@@ -26,7 +26,7 @@ namespace lv
 		~LvModel();
 
 		LvModel(const LvModel&) = delete;
-		void operator=(const LvModel&) = delete;
+		LvModel& operator=(const LvModel&) = delete;
 
 		void bind(VkCommandBuffer commandBuffer);
 		void draw(VkCommandBuffer commandBuffer);

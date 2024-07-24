@@ -37,7 +37,7 @@ namespace lv
 		~LvPipeline();
 
 		LvPipeline(const LvPipeline&) = delete;
-		void operator=(const LvPipeline&) = delete;
+		LvPipeline& operator=(const LvPipeline&) = delete;
 
 		static PipelineConfigInfo defaultPipelineConfigInfo(
 			uint32_t width,

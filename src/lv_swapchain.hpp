@@ -6,6 +6,7 @@
 #include "lv_window.hpp"
 
 #include <vector>
+#include <memory>
 
 namespace lv
 {
@@ -19,6 +20,7 @@ namespace lv
 		LvWindow& window;
 		
 		VkSwapchainKHR swapChain;
+		std::shared_ptr<LvSwapChain> oldSwapChain;
 		VkFormat swapChainImageFormat;
 		VkExtent2D swapChainExtent;
 		std::vector<VkImage> swapChainImages;
@@ -35,10 +37,16 @@ namespace lv
 
 	public:
 		LvSwapChain(LvDevice& device, LvWindow& window);
+		LvSwapChain(
+			LvDevice& device, 
+			LvWindow& window, 
+			std::shared_ptr<LvSwapChain> previous);
 		~LvSwapChain();
 
 		LvSwapChain(const LvSwapChain&) = delete;
-		void operator=(const LvSwapChain&) = delete;
+		LvSwapChain& operator=(const LvSwapChain&) = delete;
+
+		VkSwapchainKHR getVkSwapChain() { return swapChain; };
 
 		VkRenderPass getRenderPass() { return renderPass; }
 		size_t getImageCount() { return swapChainImages.size(); }
@@ -49,9 +57,9 @@ namespace lv
 		VkResult submitCommandBuffers(
 			const VkCommandBuffer* buffers, 
 			uint32_t* imageIndex);
-		void recreateSwapChain();
 
 	private:
+		void init();
 		void createSwapChain();
 		void cleanupSwapChain();
 		void createImageViews();

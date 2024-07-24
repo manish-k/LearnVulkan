@@ -14,8 +14,8 @@ namespace lv
 	private: 
 		GLFWwindow* window;
 
-		const int width;
-		const int height;
+		int width;
+		int height;
 
 		const std::string name;
 	private:
@@ -43,5 +43,7 @@ namespace lv
 		
 		bool isResized() { return resized; };
 		void resetResizedState() { resized = false; };
+		void setWidth(int newWidth) { width = newWidth; };
+		void setHeight(int newHeight) { height = newHeight; };
 	};
 }

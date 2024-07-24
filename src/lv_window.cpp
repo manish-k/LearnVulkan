@@ -29,6 +29,8 @@ namespace lv
 			name.c_str(), 
 			nullptr, 
 			nullptr);
+		glfwSetWindowUserPointer(window, this);
+		glfwSetFramebufferSizeCallback(window, framebufferResizeCallback);
 
 		int ewidth, eheight;
 		glfwGetFramebufferSize(window, &ewidth, &eheight);
@@ -80,5 +82,7 @@ namespace lv
 			reinterpret_cast<LvWindow*>(glfwGetWindowUserPointer(window));
 
 		currentWindow->resized = true;
+		currentWindow->setWidth(width);
+		currentWindow->setHeight(height);
 	}
 }

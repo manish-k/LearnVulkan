@@ -5,11 +5,17 @@ namespace lv
 	LvSwapChain::LvSwapChain(LvDevice& device, LvWindow& window)
 		: device{ device }, window{ window }
 	{
-		createSwapChain();
-		createImageViews();
-		createRenderPass();
-		createFramebuffers();
-		createSyncObjects();
+		init();
+	}
+
+	LvSwapChain::LvSwapChain(
+		LvDevice& device,
+		LvWindow& window,
+		std::shared_ptr<LvSwapChain> previous)
+		: device{ device }, window{ window }, oldSwapChain { previous }
+	{
+		init();
+		oldSwapChain = nullptr;
 	}
 
 	LvSwapChain::~LvSwapChain()
@@ -24,6 +30,15 @@ namespace lv
 			vkDestroySemaphore(ldevice, imageAvailableSemaphores[i], nullptr);
 			vkDestroyFence(ldevice, inFlightFences[i], nullptr);
 		}
+	}
+
+	void LvSwapChain::init()
+	{
+		createSwapChain();
+		createImageViews();
+		createRenderPass();
+		createFramebuffers();
+		createSyncObjects();
 	}
 	
 	void LvSwapChain::createSwapChain()
@@ -78,7 +93,8 @@ namespace lv
 		createInfo.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
 		createInfo.presentMode = presentMode;
 		createInfo.clipped = VK_TRUE;
-		createInfo.oldSwapchain = VK_NULL_HANDLE;
+		createInfo.oldSwapchain = 
+			oldSwapChain == nullptr ? VK_NULL_HANDLE: oldSwapChain->getVkSwapChain();
 
 		if (vkCreateSwapchainKHR(device.getLogicalDevice(), 
 			&createInfo, 
@@ -91,23 +107,6 @@ namespace lv
 		vkGetSwapchainImagesKHR(device.getLogicalDevice(), swapChain, &imageCount, nullptr);
 		swapChainImages.resize(imageCount);
 		vkGetSwapchainImagesKHR(device.getLogicalDevice(), swapChain, &imageCount, swapChainImages.data());
-	}
-
-	void LvSwapChain::recreateSwapChain()
-	{
-		auto extent = window.getExtent();
-		while (extent.width == 0 || extent.height == 0) {
-			extent = window.getExtent();
-			window.waitEvents();
-		}
-
-		vkDeviceWaitIdle(device.getLogicalDevice());
-
-		cleanupSwapChain();
-
-		createSwapChain();
-		createImageViews();
-		createFramebuffers();
 	}
 
 	void LvSwapChain::cleanupSwapChain()
