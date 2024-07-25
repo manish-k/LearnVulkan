@@ -11,6 +11,12 @@
 
 namespace lv
 {
+	struct SimplePushConstantsData
+	{
+		glm::vec2 offset;
+		alignas(16) glm::vec3 color;
+	};
+
 	class App
 	{
 	public:

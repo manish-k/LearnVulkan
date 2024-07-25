@@ -1,5 +1,9 @@
 #include "app.hpp"
 
+#define GLM_FORCE_RADIANS
+#define GLM_FORCE_DEPTH_ZERO_TO_ONE
+#include <glm/glm.hpp>
+
 #include <array>
 
 namespace lv
@@ -60,13 +64,19 @@ namespace lv
 
 	void App::createPipelineLayout()
 	{
+		VkPushConstantRange pushConstantRange{};
+		pushConstantRange.stageFlags = 
+			VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
+		pushConstantRange.offset = 0;
+		pushConstantRange.size = sizeof(SimplePushConstantsData);
+
 		VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
 		pipelineLayoutInfo.sType =
 			VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
 		pipelineLayoutInfo.setLayoutCount = 0; // Optional
 		pipelineLayoutInfo.pSetLayouts = nullptr; // Optional
-		pipelineLayoutInfo.pushConstantRangeCount = 0; // Optional
-		pipelineLayoutInfo.pPushConstantRanges = nullptr; // Optional
+		pipelineLayoutInfo.pushConstantRangeCount = 1;
+		pipelineLayoutInfo.pPushConstantRanges = &pushConstantRange;
 		if (vkCreatePipelineLayout(
 			lvDevice.getLogicalDevice(),
 			&pipelineLayoutInfo,
@@ -168,6 +178,18 @@ namespace lv
 		vkCmdSetScissor(commandBuffers[imageIndex], 0, 1, &scissor);
 
 		lvModel->bind(commandBuffers[imageIndex]);
+
+		SimplePushConstantsData push{};
+		push.offset = { -0.5f , -0.4f };
+		push.color = { 0.0f, 0.0f, 0.2f };
+
+		vkCmdPushConstants(
+			commandBuffers[imageIndex],
+			pipelineLayout,
+			VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
+			0,
+			sizeof(SimplePushConstantsData),
+			&push);
 
 		lvModel->draw(commandBuffers[imageIndex]);
 
