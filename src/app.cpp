@@ -87,7 +87,8 @@ namespace lv
 
 	void App::createPipeline()
 	{
-		auto pipelineConfig = LvPipeline::defaultPipelineConfigInfo(WIDTH, HEIGHT);
+		PipelineConfigInfo pipelineConfig{};
+		LvPipeline::defaultPipelineConfigInfo(WIDTH, HEIGHT, pipelineConfig);
 
 		pipelineConfig.renderPass = lvSwapChain->getRenderPass();
 		pipelineConfig.pipelineLayout = pipelineLayout;

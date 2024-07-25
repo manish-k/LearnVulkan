@@ -10,8 +10,14 @@
 namespace lv
 {
 	struct PipelineConfigInfo {
+		PipelineConfigInfo(const PipelineConfigInfo&) = delete;
+		PipelineConfigInfo& operator=(const PipelineConfigInfo&) = delete;
+
+		VkPipelineViewportStateCreateInfo viewportState;
 		std::vector<VkDynamicState> dynamicStateEnables;
 		VkPipelineDynamicStateCreateInfo dynamicStatesInfo;
+		VkPipelineColorBlendAttachmentState colorBlendAttachment{};
+		VkPipelineColorBlendStateCreateInfo colorBlendInfo{};
 		VkPipelineInputAssemblyStateCreateInfo inputAssemblyInfo;
 		VkPipelineRasterizationStateCreateInfo rasterizationInfo;
 		VkPipelineMultisampleStateCreateInfo multisampleInfo;
@@ -39,9 +45,10 @@ namespace lv
 		LvPipeline(const LvPipeline&) = delete;
 		LvPipeline& operator=(const LvPipeline&) = delete;
 
-		static PipelineConfigInfo defaultPipelineConfigInfo(
+		static void defaultPipelineConfigInfo(
 			uint32_t width,
-			uint32_t height);
+			uint32_t height,
+			PipelineConfigInfo& config);
 
 		void bind(VkCommandBuffer commandBuffer);
 
