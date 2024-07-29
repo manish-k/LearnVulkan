@@ -59,7 +59,7 @@ namespace lv
 		vkCmdDraw(commandBuffer, vertexCount, 1, 0, 0);
 	}
 
-	std::vector<VkVertexInputBindingDescription> Vertex::getBindingDescriptions()
+	std::vector<VkVertexInputBindingDescription> LvModel::Vertex::getBindingDescriptions()
 	{
 		std::vector<VkVertexInputBindingDescription> bindingDescriptions(1);
 		bindingDescriptions[0].binding = 0;
@@ -68,7 +68,7 @@ namespace lv
 		return bindingDescriptions;
 	}
 
-	std::vector<VkVertexInputAttributeDescription> Vertex::getAttributeDescriptions()
+	std::vector<VkVertexInputAttributeDescription> LvModel::Vertex::getAttributeDescriptions()
 	{
 		std::vector<VkVertexInputAttributeDescription> attributeDescriptions(2);
 		

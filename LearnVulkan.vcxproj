@@ -190,6 +190,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="src\app.cpp" />
     <ClCompile Include="src\lv_device.cpp" />
+    <ClCompile Include="src\lv_game_object.cpp" />
     <ClCompile Include="src\lv_model.cpp" />
     <ClCompile Include="src\lv_pipeline.cpp" />
     <ClCompile Include="src\lv_swapchain.cpp" />
@@ -198,6 +199,7 @@
   <ItemGroup>
     <ClInclude Include="src\app.hpp" />
     <ClInclude Include="src\lv_device.hpp" />
+    <ClInclude Include="src\lv_game_object.hpp" />
     <ClInclude Include="src\lv_model.hpp" />
     <ClInclude Include="src\lv_pipeline.hpp" />
     <ClInclude Include="src\lv_swapchain.hpp" />

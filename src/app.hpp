@@ -4,7 +4,7 @@
 #include "lv_device.hpp"
 #include "lv_pipeline.hpp"
 #include "lv_swapchain.hpp"
-#include "lv_model.hpp"
+#include "lv_game_object.hpp"
 
 #include <memory>
 #include <vector>
@@ -13,6 +13,7 @@ namespace lv
 {
 	struct SimplePushConstantsData
 	{
+		glm::mat2 transform{1.f};
 		glm::vec2 offset;
 		alignas(16) glm::vec3 color;
 	};
@@ -30,8 +31,7 @@ namespace lv
 		VkPipelineLayout pipelineLayout;
 		std::unique_ptr<LvPipeline> lvPipeline;
 		std::vector<VkCommandBuffer> commandBuffers;
-		std::unique_ptr<LvModel> lvModel;
-
+		std::vector<LvGameObject> gameObjects;
 
 	public:
 		App();
@@ -48,6 +48,7 @@ namespace lv
 		void recreateCommandBuffers();
 		void recordCommandBuffers(uint32_t imageIndex);
 		void drawFrame();
-		void loadModel();
+		void loadGameObjects();
+		void renderGameObjects(VkCommandBuffer commandBuffer);
 	};
 }

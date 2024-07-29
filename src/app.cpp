@@ -3,6 +3,7 @@
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #include <glm/glm.hpp>
+#include <glm/gtc/constants.hpp>
 
 #include <array>
 
@@ -10,7 +11,7 @@ namespace lv
 {
 	App::App()
 	{
-		loadModel();
+		loadGameObjects();
 		createPipelineLayout();
 		recreateSwapChain();
 		createCommandBuffers();
@@ -178,21 +179,7 @@ namespace lv
 		scissor.extent = lvSwapChain->getSwapChainExtent();
 		vkCmdSetScissor(commandBuffers[imageIndex], 0, 1, &scissor);
 
-		lvModel->bind(commandBuffers[imageIndex]);
-
-		SimplePushConstantsData push{};
-		push.offset = { -0.5f , -0.4f };
-		push.color = { 0.0f, 0.0f, 0.2f };
-
-		vkCmdPushConstants(
-			commandBuffers[imageIndex],
-			pipelineLayout,
-			VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
-			0,
-			sizeof(SimplePushConstantsData),
-			&push);
-
-		lvModel->draw(commandBuffers[imageIndex]);
+		renderGameObjects(commandBuffers[imageIndex]);
 
 		vkCmdEndRenderPass(commandBuffers[imageIndex]);
 		if (vkEndCommandBuffer(commandBuffers[imageIndex]) != VK_SUCCESS) {
@@ -234,14 +221,45 @@ namespace lv
 		}
 	}
 
-	void App::loadModel()
+	void App::loadGameObjects()
 	{
-		std::vector<Vertex> vertices{
+		std::vector<LvModel::Vertex> vertices{
 			{{0.0f, -0.5f}, {1.0f, 0.0f, 0.0f}},
 			{{0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}},
 			{{-0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}}
 		};
 
-		lvModel = std::make_unique<LvModel>(lvDevice, vertices);
+		auto baseModel = std::make_shared<LvModel>(lvDevice, vertices);
+		auto triangle = LvGameObject::createGameObject();
+		triangle.color = {1.f, 0.f, 0.f};
+		triangle.transform.scale = { 1.5f, 1.4f };
+		triangle.transform.translation = {0.5f, 0.f};
+		triangle.transform.rotation = glm::two_pi<float>() * 0.25f;
+		triangle.model = baseModel;
+
+		gameObjects.push_back(std::move(triangle));
+	}
+
+	void App::renderGameObjects(VkCommandBuffer commandBuffer)
+	{
+		for (auto& object : gameObjects)
+		{
+			object.model->bind(commandBuffer);
+
+			SimplePushConstantsData push{};
+			push.offset = object.transform.translation;
+			push.color = object.color;
+			push.transform = object.transform.mat2();
+
+			vkCmdPushConstants(
+				commandBuffer,
+				pipelineLayout,
+				VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
+				0,
+				sizeof(SimplePushConstantsData),
+				&push);
+
+			object.model->draw(commandBuffer);
+		}
 	}
 }

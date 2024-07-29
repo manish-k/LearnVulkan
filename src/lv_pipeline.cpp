@@ -187,8 +187,8 @@ namespace lv
 			vertShaderStageInfo, fragShaderStageInfo 
 		};
 
-		auto bindingDescriptions = Vertex::getBindingDescriptions();
-		auto attributeDescriptions = Vertex::getAttributeDescriptions();
+		auto bindingDescriptions = LvModel::Vertex::getBindingDescriptions();
+		auto attributeDescriptions = LvModel::Vertex::getAttributeDescriptions();
 		VkPipelineVertexInputStateCreateInfo vertexInputInfo{};
 		vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
 		vertexInputInfo.vertexAttributeDescriptionCount =
