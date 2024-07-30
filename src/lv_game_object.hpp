@@ -24,6 +24,7 @@ namespace lv
 
 	class LvGameObject
 	{
+	public:
 		using id_t = unsigned int;
 
 	private:
@@ -46,5 +47,7 @@ namespace lv
 		LvGameObject& operator=(const LvGameObject&) = delete;
 		LvGameObject(LvGameObject&&) = default;
 		LvGameObject& operator=(LvGameObject&&) = default;
+
+		const id_t getId() { return id; };
 	};
 }
