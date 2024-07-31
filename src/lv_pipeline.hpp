@@ -45,10 +45,7 @@ namespace lv
 		LvPipeline(const LvPipeline&) = delete;
 		LvPipeline& operator=(const LvPipeline&) = delete;
 
-		static void defaultPipelineConfigInfo(
-			uint32_t width,
-			uint32_t height,
-			PipelineConfigInfo& config);
+		static void defaultPipelineConfigInfo(PipelineConfigInfo& config);
 
 		void bind(VkCommandBuffer commandBuffer);
 

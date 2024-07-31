@@ -80,6 +80,14 @@ namespace lv
 			VkDeviceMemory &bufferMemory
 		);
 
+		void createImageWithInfo(
+			const VkImageCreateInfo& imageInfo,
+			VkMemoryPropertyFlags properties,
+			VkImage& image,
+			VkDeviceMemory& imageMemory);
+		VkFormat findSupportedFormat(
+			const std::vector<VkFormat>& candidates, VkImageTiling tiling, VkFormatFeatureFlags features);
+
 	private:
 		void createVulkanInstance();
 		void cleanup();

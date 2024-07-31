@@ -54,11 +54,7 @@ namespace lv
 		return buffer;
 	}
 
-	void LvPipeline::defaultPipelineConfigInfo(
-		uint32_t width,
-		uint32_t height,
-		PipelineConfigInfo& configInfo
-	)
+	void LvPipeline::defaultPipelineConfigInfo(PipelineConfigInfo& configInfo)
 	{
 		configInfo.viewportState.sType = 
 			VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;

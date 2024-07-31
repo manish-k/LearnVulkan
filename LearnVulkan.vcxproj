@@ -193,8 +193,10 @@
     <ClCompile Include="src\lv_game_object.cpp" />
     <ClCompile Include="src\lv_model.cpp" />
     <ClCompile Include="src\lv_pipeline.cpp" />
+    <ClCompile Include="src\lv_renderer.cpp" />
     <ClCompile Include="src\lv_swapchain.cpp" />
     <ClCompile Include="src\lv_window.cpp" />
+    <ClCompile Include="src\simple_render_system.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\app.hpp" />
@@ -202,8 +204,10 @@
     <ClInclude Include="src\lv_game_object.hpp" />
     <ClInclude Include="src\lv_model.hpp" />
     <ClInclude Include="src\lv_pipeline.hpp" />
+    <ClInclude Include="src\lv_renderer.hpp" />
     <ClInclude Include="src\lv_swapchain.hpp" />
     <ClInclude Include="src\lv_window.hpp" />
+    <ClInclude Include="src\simple_render_system.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="compile_shader.bat" />

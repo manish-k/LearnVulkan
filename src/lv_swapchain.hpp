@@ -22,7 +22,12 @@ namespace lv
 		VkSwapchainKHR swapChain;
 		std::shared_ptr<LvSwapChain> oldSwapChain;
 		VkFormat swapChainImageFormat;
+		VkFormat swapChainDepthFormat;
 		VkExtent2D swapChainExtent;
+
+		std::vector<VkImage> depthImages;
+		std::vector<VkDeviceMemory> depthImageMemorys;
+		std::vector<VkImageView> depthImageViews;
 		std::vector<VkImage> swapChainImages;
 		std::vector<VkImageView> swapChainImageViews;
 		std::vector<VkFramebuffer> swapChainFramebuffers;
@@ -58,6 +63,11 @@ namespace lv
 			const VkCommandBuffer* buffers, 
 			uint32_t* imageIndex);
 
+		bool compareSwapFormats(const LvSwapChain& swapChain) const {
+			return swapChain.swapChainDepthFormat == swapChainDepthFormat &&
+				swapChain.swapChainImageFormat == swapChainImageFormat;
+		}
+
 	private:
 		void init();
 		void createSwapChain();
@@ -66,6 +76,7 @@ namespace lv
 		void createRenderPass();
 		void createFramebuffers();
 		void createSyncObjects();
+		void createDepthResources();
 
 		VkSurfaceFormatKHR chooseSwapSurfaceFormat(
 			const std::vector<VkSurfaceFormatKHR>& availableFormats);
@@ -73,5 +84,6 @@ namespace lv
 			const std::vector<VkPresentModeKHR>& availablePresentModes);
 		VkExtent2D chooseSwapExtent(
 			const VkSurfaceCapabilitiesKHR& capabilities);
+		VkFormat findDepthFormat();
 	};
 }
