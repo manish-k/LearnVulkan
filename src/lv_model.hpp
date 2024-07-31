@@ -19,6 +19,7 @@ namespace lv
 		{
 			glm::vec3 position{};
 			glm::vec3 color{};
+			glm::vec2 texCoord;
 
 			static std::vector<VkVertexInputBindingDescription> getBindingDescriptions();
 			static std::vector<VkVertexInputAttributeDescription> getAttributeDescriptions();

@@ -48,13 +48,5 @@ namespace lv
 		cube.transform.translation = { .0f, .0f, .5f };
 		cube.transform.scale = { .5f, .5f, .5f };
 		gameObjects.push_back(std::move(cube));
-
-		std::shared_ptr<LvModel> squareModel = LvModel::createSquareModel(
-			lvDevice, { .0f, .0f, .0f });
-		auto square = LvGameObject::createGameObject();
-		square.model = squareModel;
-		square.transform.translation = { .0f, .0f, .5f };
-		square.transform.scale = { .5f, .5f, .5f };
-		//gameObjects.push_back(std::move(square));
 	}
 }
