@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -189,6 +189,7 @@
   <ItemGroup>
     <ClCompile Include="main.cpp" />
     <ClCompile Include="src\app.cpp" />
+    <ClCompile Include="src\lv_camera.cpp" />
     <ClCompile Include="src\lv_device.cpp" />
     <ClCompile Include="src\lv_game_object.cpp" />
     <ClCompile Include="src\lv_model.cpp" />
@@ -200,6 +201,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\app.hpp" />
+    <ClInclude Include="src\lv_camera.hpp" />
     <ClInclude Include="src\lv_device.hpp" />
     <ClInclude Include="src\lv_game_object.hpp" />
     <ClInclude Include="src\lv_model.hpp" />

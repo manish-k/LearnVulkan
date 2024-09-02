@@ -4,6 +4,7 @@
 #include "lv_pipeline.hpp"
 #include "lv_swapchain.hpp"
 #include "lv_game_object.hpp"
+#include "lv_camera.hpp"
 
 #include <memory>
 #include <vector>
@@ -28,7 +29,8 @@ namespace lv
 		~SimpleRenderSystem();
 		void renderGameObjects(
 			VkCommandBuffer commandBuffer,
-			std::vector<LvGameObject>& gameObjects);
+			std::vector<LvGameObject>& gameObjects,
+			const LvCamera& camera);
 
 	private:
 		void createPipeline(VkRenderPass renderPass);

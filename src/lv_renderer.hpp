@@ -50,6 +50,12 @@ namespace lv
 				"Cannot get frame index when frame not in progress");
 			return currentFrameIndex;
 		}
+		float getAspectRatio() const {
+			auto extent =  lvSwapChain->getSwapChainExtent();
+			return static_cast<float>(extent.width) / 
+				static_cast<float>(extent.height);
+		}
+
 	private:
 		void recreateSwapChain();
 		void createCommandBuffers();
