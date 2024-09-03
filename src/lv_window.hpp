@@ -45,5 +45,6 @@ namespace lv
 		void resetResizedState() { resized = false; };
 		void setWidth(int newWidth) { width = newWidth; };
 		void setHeight(int newHeight) { height = newHeight; };
+		GLFWwindow* getGLFWwindow() const { return window; }
 	};
 }

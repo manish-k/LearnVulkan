@@ -6,8 +6,10 @@
 #include <glm/gtc/constants.hpp>
 
 #include "simple_render_system.hpp"
+#include "input_controller.hpp"
 
 #include <array>
+#include <chrono>
 
 namespace lv
 {
@@ -25,19 +27,34 @@ namespace lv
 		SimpleRenderSystem simpleRenderSystem{lvDevice, lvRenderer.getSwapChainRenderPass()};
 		LvCamera camera{};
 
+		auto viewerObject = LvGameObject::createGameObject();
+		InputController cameraController{};
+
+		auto currentTime = std::chrono::high_resolution_clock::now();
+
 		while (!lvWindow.shouldClose())
 		{
 			lvWindow.pollEvents();
+
+			auto newTime = std::chrono::high_resolution_clock::now();
+			float frameTime =
+				std::chrono::duration<float, std::chrono::seconds::period>(newTime - currentTime).count();
+			currentTime = newTime;
+
 			if (auto commandBuffer = lvRenderer.beginFrame())
 			{
 				float aspect = lvRenderer.getAspectRatio();
-				//camera.setOrthographicProjection(-aspect, aspect, -1, 1, -1, 1);
 				camera.setPerspectiveProjection(
 					glm::radians(50.f), aspect, 0.5f, 10.f);
-				//camera.setViewDirection(glm::vec3(0.f), glm::vec3(0.5f, 0.f, 1.f));
 				camera.setViewTarget(
 					glm::vec3(-1.f, -2.f, -2.f), 
 					glm::vec3(0.f, 0.f, 2.5f));
+
+				cameraController.updateInPlaneXZ(
+					lvWindow.getGLFWwindow(), frameTime, viewerObject);
+				camera.setViewYXZ(
+					viewerObject.transform.translation,
+					viewerObject.transform.rotation);
 
 				lvRenderer.beginSwapChainRenderPass(commandBuffer);
 				simpleRenderSystem.renderGameObjects(

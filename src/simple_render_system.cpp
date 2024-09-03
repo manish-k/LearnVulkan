@@ -73,11 +73,6 @@ namespace lv
 			object.model->bind(commandBuffer);
 
 			SimplePushConstantsData push{};
-			object.transform.rotation.y = 
-				glm::mod(object.transform.rotation.y + 0.0001f, glm::two_pi<float>());
-			object.transform.rotation.x =
-				glm::mod(object.transform.rotation.x + 0.00005f, glm::two_pi<float>());
-
 			push.color = object.color;
 			push.transform = projectionView * object.transform.mat4();
 
