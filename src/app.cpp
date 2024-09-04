@@ -72,7 +72,8 @@ namespace lv
 	void App::loadGameObjects()
 	{
 		std::shared_ptr<LvModel> cubeModel = LvModel::createCubeModel(
-			lvDevice, { .0f, .0f, .0f });
+			lvDevice, 
+			{ .0f, .0f, .0f });
 		auto cube = LvGameObject::createGameObject();
 		cube.model = cubeModel;
 		cube.transform.translation = { .0f, .0f, 2.5f };
