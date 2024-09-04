@@ -88,6 +88,11 @@ namespace lv
 		VkFormat findSupportedFormat(
 			const std::vector<VkFormat>& candidates, VkImageTiling tiling, VkFormatFeatureFlags features);
 
+		void copyBuffer(
+			VkBuffer srcBuffer,
+			VkBuffer dstBuffer,
+			VkDeviceSize size);
+
 	private:
 		void createVulkanInstance();
 		void cleanup();

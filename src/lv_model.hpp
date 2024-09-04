@@ -25,7 +25,12 @@ namespace lv
 			static std::vector<VkVertexInputAttributeDescription> getAttributeDescriptions();
 		};
 
-		LvModel(LvDevice& device, const std::vector<Vertex>& vertices);
+		struct Builder {
+			std::vector<Vertex> vertices{};
+			std::vector<uint32_t> indices{};
+		};
+
+		LvModel(LvDevice& device, const LvModel::Builder& builder);
 		~LvModel();
 
 		LvModel(const LvModel&) = delete;
@@ -43,16 +48,23 @@ namespace lv
 		static std::unique_ptr<LvModel> createTriangleModel(
 			LvDevice& device, 
 			glm::vec3 offset);
-		static std::unique_ptr<LvModel> createCircleModel(
-			LvDevice& device, 
-			unsigned int numSides,
-			glm::vec3 offset);
+		//static std::unique_ptr<LvModel> createCircleModel(
+		//	LvDevice& device, 
+		//	unsigned int numSides,
+		//	glm::vec3 offset);
 	private:
 		LvDevice& device;
+
 		VkBuffer vertexBuffer;
 		VkDeviceMemory vertexBufferMemory;
 		uint32_t vertexCount;
 
+		bool hasIndexBuffer{ false };
+		VkBuffer indexBuffer;
+		VkDeviceMemory indexBufferMemory;
+		uint32_t indexCount;
+
 		void createVertexBuffers(const std::vector<Vertex> &vertices);
+		void createIndexBuffers(const std::vector<uint32_t>& indices);
 	};
 }

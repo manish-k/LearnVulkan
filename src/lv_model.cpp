@@ -11,16 +11,23 @@
 
 namespace lv
 {
-	LvModel::LvModel(LvDevice& device, const std::vector<Vertex>& vertices)
+	LvModel::LvModel(LvDevice& device, const LvModel::Builder& builder)
 		: device{device}
 	{
-		createVertexBuffers(vertices);
+		createVertexBuffers(builder.vertices);
+		createIndexBuffers(builder.indices);
 	}
 
 	LvModel::~LvModel()
 	{
-		vkDestroyBuffer(device.getLogicalDevice(), vertexBuffer, nullptr);
-		vkFreeMemory(device.getLogicalDevice(), vertexBufferMemory, nullptr);
+		auto ldevice = device.getLogicalDevice();
+		vkDestroyBuffer(ldevice, vertexBuffer, nullptr);
+		vkFreeMemory(ldevice, vertexBufferMemory, nullptr);
+
+		if (hasIndexBuffer) {
+			vkDestroyBuffer(ldevice, indexBuffer, nullptr);
+			vkFreeMemory(ldevice, indexBufferMemory, nullptr);
+		}
 	}
 
 	void LvModel::createVertexBuffers(const std::vector<Vertex>& vertices)
@@ -31,25 +38,91 @@ namespace lv
 
 		VkDeviceSize bufferSize = sizeof(vertices[0]) * vertexCount;
 
+		VkBuffer stagingBuffer;
+		VkDeviceMemory stagingBufferMemory;
+
 		device.createBuffer(
 			bufferSize,
-			VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
+			VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
 			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-			vertexBuffer,
-			vertexBufferMemory
+			stagingBuffer,
+			stagingBufferMemory
 		);
 
 		void* data;
 		vkMapMemory(
 			device.getLogicalDevice(), 
-			vertexBufferMemory, 
+			stagingBufferMemory,
 			0, 
 			bufferSize, 
 			0, 
 			&data
 		);
 		memcpy(data, vertices.data(), static_cast<size_t>(bufferSize));
-		vkUnmapMemory(device.getLogicalDevice(), vertexBufferMemory);
+		vkUnmapMemory(device.getLogicalDevice(), stagingBufferMemory);
+
+		device.createBuffer(
+			bufferSize,
+			VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
+			VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+			vertexBuffer,
+			vertexBufferMemory
+		);
+
+
+		device.copyBuffer(stagingBuffer, vertexBuffer, bufferSize);
+
+		vkDestroyBuffer(device.getLogicalDevice(), stagingBuffer, nullptr);
+		vkFreeMemory(device.getLogicalDevice(), stagingBufferMemory, nullptr);
+	}
+
+	void LvModel::createIndexBuffers(const std::vector<uint32_t>& indices)
+	{
+		indexCount = static_cast<uint32_t>(indices.size());
+		hasIndexBuffer = indexCount > 0;
+
+		if (!hasIndexBuffer) {
+			return;
+		}
+
+		VkDeviceSize bufferSize = sizeof(indices[0]) * indexCount;
+
+		VkBuffer stagingBuffer;
+		VkDeviceMemory stagingBufferMemory;
+
+		device.createBuffer(
+			bufferSize,
+			VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+			stagingBuffer,
+			stagingBufferMemory
+		);
+
+		void* data;
+		vkMapMemory(
+			device.getLogicalDevice(),
+			stagingBufferMemory,
+			0,
+			bufferSize,
+			0,
+			&data
+		);
+		memcpy(data, indices.data(), static_cast<size_t>(bufferSize));
+		vkUnmapMemory(device.getLogicalDevice(), stagingBufferMemory);
+
+		device.createBuffer(
+			bufferSize,
+			VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
+			VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+			indexBuffer,
+			indexBufferMemory
+		);
+
+
+		device.copyBuffer(stagingBuffer, indexBuffer, bufferSize);
+
+		vkDestroyBuffer(device.getLogicalDevice(), stagingBuffer, nullptr);
+		vkFreeMemory(device.getLogicalDevice(), stagingBufferMemory, nullptr);
 	}
 
 	void LvModel::bind(VkCommandBuffer commandBuffer)
@@ -58,11 +131,20 @@ namespace lv
 		VkDeviceSize offsets[] = { 0 };
 
 		vkCmdBindVertexBuffers(commandBuffer, 0, 1, buffers, offsets);
+
+		if (hasIndexBuffer) {
+			vkCmdBindIndexBuffer(commandBuffer, indexBuffer, 0, VK_INDEX_TYPE_UINT32);
+		}
 	}
 
 	void LvModel::draw(VkCommandBuffer commandBuffer)
 	{
-		vkCmdDraw(commandBuffer, vertexCount, 1, 0, 0);
+		if (hasIndexBuffer) {
+			vkCmdDrawIndexed(commandBuffer, indexCount, 1, 0, 0, 0);
+		}
+		else {
+			vkCmdDraw(commandBuffer, vertexCount, 1, 0, 0);
+		}
 	}
 
 	std::vector<VkVertexInputBindingDescription> LvModel::Vertex::getBindingDescriptions()
@@ -94,63 +176,55 @@ namespace lv
 	}
 
 	std::unique_ptr<LvModel> LvModel::createCubeModel(
-		LvDevice& device, glm::vec3 offset)
+		LvDevice& device,
+		glm::vec3 offset)
 	{
-		std::vector<LvModel::Vertex> vertices{
-
+		LvModel::Builder modelBuilder{};
+		modelBuilder.vertices = {
 			// left face (white)
 			{{-.5f, -.5f, -.5f}, {.9f, .9f, .9f}},
 			{{-.5f, .5f, .5f}, {.9f, .9f, .9f}},
 			{{-.5f, -.5f, .5f}, {.9f, .9f, .9f}},
-			{{-.5f, -.5f, -.5f}, {.9f, .9f, .9f}},
 			{{-.5f, .5f, -.5f}, {.9f, .9f, .9f}},
-			{{-.5f, .5f, .5f}, {.9f, .9f, .9f}},
 
 			// right face (yellow)
 			{{.5f, -.5f, -.5f}, {.8f, .8f, .1f}},
 			{{.5f, .5f, .5f}, {.8f, .8f, .1f}},
 			{{.5f, -.5f, .5f}, {.8f, .8f, .1f}},
-			{{.5f, -.5f, -.5f}, {.8f, .8f, .1f}},
 			{{.5f, .5f, -.5f}, {.8f, .8f, .1f}},
-			{{.5f, .5f, .5f}, {.8f, .8f, .1f}},
 
 			// top face (orange, remember y axis points down)
 			{{-.5f, -.5f, -.5f}, {.9f, .6f, .1f}},
 			{{.5f, -.5f, .5f}, {.9f, .6f, .1f}},
 			{{-.5f, -.5f, .5f}, {.9f, .6f, .1f}},
-			{{-.5f, -.5f, -.5f}, {.9f, .6f, .1f}},
 			{{.5f, -.5f, -.5f}, {.9f, .6f, .1f}},
-			{{.5f, -.5f, .5f}, {.9f, .6f, .1f}},
 
 			// bottom face (red)
 			{{-.5f, .5f, -.5f}, {.8f, .1f, .1f}},
 			{{.5f, .5f, .5f}, {.8f, .1f, .1f}},
 			{{-.5f, .5f, .5f}, {.8f, .1f, .1f}},
-			{{-.5f, .5f, -.5f}, {.8f, .1f, .1f}},
 			{{.5f, .5f, -.5f}, {.8f, .1f, .1f}},
-			{{.5f, .5f, .5f}, {.8f, .1f, .1f}},
 
 			// nose face (blue)
 			{{-.5f, -.5f, 0.5f}, {.1f, .1f, .8f}},
 			{{.5f, .5f, 0.5f}, {.1f, .1f, .8f}},
 			{{-.5f, .5f, 0.5f}, {.1f, .1f, .8f}},
-			{{-.5f, -.5f, 0.5f}, {.1f, .1f, .8f}},
 			{{.5f, -.5f, 0.5f}, {.1f, .1f, .8f}},
-			{{.5f, .5f, 0.5f}, {.1f, .1f, .8f}},
 
 			// tail face (green)
 			{{-.5f, -.5f, -0.5f}, {.1f, .8f, .1f}},
 			{{.5f, .5f, -0.5f}, {.1f, .8f, .1f}},
 			{{-.5f, .5f, -0.5f}, {.1f, .8f, .1f}},
-			{{-.5f, -.5f, -0.5f}, {.1f, .8f, .1f}},
 			{{.5f, -.5f, -0.5f}, {.1f, .8f, .1f}},
-			{{.5f, .5f, -0.5f}, {.1f, .8f, .1f}},
-
 		};
-		for (auto& v : vertices) {
+		for (auto& v : modelBuilder.vertices) {
 			v.position += offset;
 		}
-		return std::make_unique<LvModel>(device, vertices);
+
+		modelBuilder.indices = { 0,  1,  2,  0,  3,  1,  4,  5,  6,  4,  7,  5,  8,  9,  10, 8,  11, 9,
+								12, 13, 14, 12, 15, 13, 16, 17, 18, 16, 19, 17, 20, 21, 22, 20, 23, 21 };
+
+		return std::make_unique<LvModel>(device, modelBuilder);
 	}
 
 	std::unique_ptr<LvModel> LvModel::createSquareModel(
@@ -164,10 +238,14 @@ namespace lv
 			{{.5f, -.5f, 0.5f}, {.1f, .1f, .8f}},
 			{{.5f, .5f, 0.5f}, {.1f, .1f, .8f}},
 		};
-		for (auto& v : vertices) {
+
+		LvModel::Builder modelBuilder{};
+		modelBuilder.vertices = vertices;
+		
+		for (auto& v : modelBuilder.vertices) {
 			v.position += offset;
 		}
-		return std::make_unique<LvModel>(device, vertices);
+		return std::make_unique<LvModel>(device, modelBuilder);
 	}
 
 	std::unique_ptr<LvModel> LvModel::createTriangleModel(
@@ -178,40 +256,43 @@ namespace lv
 			{{0.5f, .0f, .0f}, {.0f, 1.f, .0f}},
 			{{-0.5f, .0f, .0f}, {.0f, .0f, 1.f}}
 		};
-		for (auto& v : vertices) {
+		LvModel::Builder modelBuilder{};
+		modelBuilder.vertices = vertices;
+
+		for (auto& v : modelBuilder.vertices) {
 			v.position += offset;
 		}
-		return std::make_unique<LvModel>(device, vertices);
+		return std::make_unique<LvModel>(device, modelBuilder);
 	}
 
-	std::unique_ptr<LvModel> LvModel::createCircleModel(
-		LvDevice& device,
-		unsigned int numSides,
-		glm::vec3 offset)
-	{
-		std::vector<LvModel::Vertex> uniqueVertices{};
-		for (unsigned int i = 1; i <= numSides; i++) {
-			float angle = (i - 1) * glm::two_pi<float>() / numSides;
-			uniqueVertices.push_back({ 
-				{
-					glm::cos(angle), 
-					glm::sin(angle), 
-					.0f
-				}
-			});
-		}
-		uniqueVertices.push_back({});  // adds center vertex at 0, 0
+	//std::unique_ptr<LvModel> LvModel::createCircleModel(
+	//	LvDevice& device,
+	//	unsigned int numSides,
+	//	glm::vec3 offset)
+	//{
+	//	std::vector<LvModel::Vertex> uniqueVertices{};
+	//	for (unsigned int i = 1; i <= numSides; i++) {
+	//		float angle = (i - 1) * glm::two_pi<float>() / numSides;
+	//		uniqueVertices.push_back({ 
+	//			{
+	//				glm::cos(angle), 
+	//				glm::sin(angle), 
+	//				.0f
+	//			}
+	//		});
+	//	}
+	//	uniqueVertices.push_back({});  // adds center vertex at 0, 0
 
-		std::vector<LvModel::Vertex> vertices{};
-		for (unsigned int i = 0; i <= numSides; i++) {
-			vertices.push_back(uniqueVertices[i - 1]);
-			vertices.push_back(uniqueVertices[(i) % numSides]);
-			vertices.push_back(uniqueVertices[numSides]);
-		}
+	//	std::vector<LvModel::Vertex> vertices{};
+	//	for (unsigned int i = 0; i <= numSides; i++) {
+	//		vertices.push_back(uniqueVertices[i - 1]);
+	//		vertices.push_back(uniqueVertices[(i) % numSides]);
+	//		vertices.push_back(uniqueVertices[numSides]);
+	//	}
 
-		//for (auto& v : vertices) {
-		//	v.position += offset;
-		//}
-		return std::make_unique<LvModel>(device, vertices);
-	}
+	//	//for (auto& v : vertices) {
+	//	//	v.position += offset;
+	//	//}
+	//	return std::make_unique<LvModel>(device, vertices);
+	//}
 }
