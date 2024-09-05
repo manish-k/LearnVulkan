@@ -95,6 +95,7 @@
       <AdditionalIncludeDirectories>D:\dev\LearnVulkan\lib;D:\libs\glm;D:\libs\glfw-3.4.bin.WIN64\include;C:\VulkanSDK\1.3.283.0\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <TreatWarningAsError>true</TreatWarningAsError>
+      <PreprocessToFile>false</PreprocessToFile>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -120,6 +121,7 @@
       <AdditionalIncludeDirectories>D:\dev\LearnVulkan\lib;D:\libs\glm;D:\libs\glfw-3.4.bin.WIN64\include;C:\VulkanSDK\1.3.283.0\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <TreatWarningAsError>true</TreatWarningAsError>
+      <PreprocessToFile>false</PreprocessToFile>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -145,6 +147,7 @@
       <AdditionalIncludeDirectories>D:\dev\LearnVulkan\lib;D:\libs\glm;D:\libs\glfw-3.4.bin.WIN64\include;C:\VulkanSDK\1.3.283.0\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <TreatWarningAsError>true</TreatWarningAsError>
+      <PreprocessToFile>false</PreprocessToFile>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -170,6 +173,7 @@
       <AdditionalIncludeDirectories>D:\dev\LearnVulkan\lib;D:\libs\glm;D:\libs\glfw-3.4.bin.WIN64\include;C:\VulkanSDK\1.3.283.0\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <TreatWarningAsError>true</TreatWarningAsError>
+      <PreprocessToFile>false</PreprocessToFile>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -210,6 +214,7 @@
     <ClInclude Include="src\lv_pipeline.hpp" />
     <ClInclude Include="src\lv_renderer.hpp" />
     <ClInclude Include="src\lv_swapchain.hpp" />
+    <ClInclude Include="src\lv_utils.hpp" />
     <ClInclude Include="src\lv_window.hpp" />
     <ClInclude Include="src\simple_render_system.hpp" />
   </ItemGroup>

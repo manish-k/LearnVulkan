@@ -4,13 +4,29 @@
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #include <glm/glm.hpp>
 #include <glm/gtc/constants.hpp>
+#define GLM_ENABLE_EXPERIMENTAL
+#include <glm/gtx/hash.hpp>
 
 #define TINYOBJLOADER_IMPLEMENTATION
 #include <tiny_obj_loader.h>
 
 #include "lv_device.hpp"
+#include "lv_utils.hpp"
 
 #include <cassert>
+#include <unordered_map>
+
+// injecting hash function for Vertex into std namespace
+namespace std {
+	template <>
+	struct hash<lv::LvModel::Vertex> {
+		size_t operator()(lv::LvModel::Vertex const& vertex) const {
+			size_t seed = 0;
+			lv::hashCombine(seed, vertex.position, vertex.color, vertex.normal, vertex.uv);
+			return seed;
+		}
+	};
+}
 
 namespace lv
 {
@@ -64,6 +80,7 @@ namespace lv
 		vertices.clear();
 		indices.clear();
 
+		std::unordered_map<Vertex, uint32_t> uniqueVertices{};
 		for (const auto& shape : shapes) {
 			for (const auto& index : shape.mesh.indices) {
 				Vertex vertex{};
@@ -107,7 +124,12 @@ namespace lv
 					};
 				}
 
-				vertices.push_back(vertex);
+				if (uniqueVertices.count(vertex) == 0)
+				{
+					uniqueVertices[vertex] = static_cast<uint32_t>(vertices.size());
+					vertices.push_back(vertex);
+				}
+				indices.push_back(uniqueVertices[vertex]);
 			}
 		}
 	}
