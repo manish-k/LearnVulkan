@@ -71,13 +71,14 @@ namespace lv
 
 	void App::loadGameObjects()
 	{
-		std::shared_ptr<LvModel> cubeModel = LvModel::createCubeModel(
+		std::shared_ptr<LvModel> model = LvModel::createModelFromFile(
 			lvDevice, 
-			{ .0f, .0f, .0f });
-		auto cube = LvGameObject::createGameObject();
-		cube.model = cubeModel;
-		cube.transform.translation = { .0f, .0f, 2.5f };
-		cube.transform.scale = { .5f, .5f, .5f };
-		gameObjects.push_back(std::move(cube));
+			"models/colored_cube.obj"
+		);
+		auto gameObj = LvGameObject::createGameObject();
+		gameObj.model = model;
+		gameObj.transform.translation = { .0f, .0f, 2.5f };
+		gameObj.transform.scale = { .5f, .5f, .5f };
+		gameObjects.push_back(std::move(gameObj));
 	}
 }

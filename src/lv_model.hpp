@@ -19,7 +19,8 @@ namespace lv
 		{
 			glm::vec3 position{};
 			glm::vec3 color{};
-			glm::vec2 texCoord;
+			glm::vec3 normal{};
+			glm::vec2 uv{};
 
 			static std::vector<VkVertexInputBindingDescription> getBindingDescriptions();
 			static std::vector<VkVertexInputAttributeDescription> getAttributeDescriptions();
@@ -28,6 +29,8 @@ namespace lv
 		struct Builder {
 			std::vector<Vertex> vertices{};
 			std::vector<uint32_t> indices{};
+
+			void loadModel(const std::string& filepath);
 		};
 
 		LvModel(LvDevice& device, const LvModel::Builder& builder);
@@ -52,6 +55,9 @@ namespace lv
 		//	LvDevice& device, 
 		//	unsigned int numSides,
 		//	glm::vec3 offset);
+		static std::unique_ptr<LvModel> createModelFromFile(
+			LvDevice& device,
+			const std::string& filepath);
 	private:
 		LvDevice& device;
 
