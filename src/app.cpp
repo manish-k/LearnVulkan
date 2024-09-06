@@ -71,14 +71,34 @@ namespace lv
 
 	void App::loadGameObjects()
 	{
-		std::shared_ptr<LvModel> model = LvModel::createModelFromFile(
+		std::shared_ptr<LvModel> model1 = LvModel::createModelFromFile(
 			lvDevice, 
-			"models/colored_cube.obj"
+			"models/flat_vase.obj"
 		);
-		auto gameObj = LvGameObject::createGameObject();
-		gameObj.model = model;
-		gameObj.transform.translation = { .0f, .0f, 2.5f };
-		gameObj.transform.scale = { .5f, .5f, .5f };
-		gameObjects.push_back(std::move(gameObj));
+		auto gameObj1 = LvGameObject::createGameObject();
+		gameObj1.model = model1;
+		gameObj1.transform.translation = { -1.f, .5f, 2.5f };
+		gameObj1.transform.scale = glm::vec3{3.5f};
+		gameObjects.push_back(std::move(gameObj1));
+
+		std::shared_ptr<LvModel> model2 = LvModel::createModelFromFile(
+			lvDevice,
+			"models/smooth_vase.obj"
+		);
+		auto gameObj2 = LvGameObject::createGameObject();
+		gameObj2.model = model2;
+		gameObj2.transform.translation = { .0f, .5f, 2.5f };
+		gameObj2.transform.scale = glm::vec3{ 3.5f };
+		gameObjects.push_back(std::move(gameObj2));
+
+		std::shared_ptr<LvModel> model3 = LvModel::createModelFromFile(
+			lvDevice,
+			"models/smooth_vase.obj"
+		);
+		auto gameObj3 = LvGameObject::createGameObject();
+		gameObj3.model = model3;
+		gameObj3.transform.translation = { 1.f, .5f, 2.5f };
+		gameObj3.transform.scale = { 3.f, 1.5f, 3.f };
+		gameObjects.push_back(std::move(gameObj3));
 	}
 }

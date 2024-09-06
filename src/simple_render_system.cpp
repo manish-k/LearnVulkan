@@ -73,8 +73,8 @@ namespace lv
 			object.model->bind(commandBuffer);
 
 			SimplePushConstantsData push{};
-			push.color = object.color;
 			push.transform = projectionView * object.transform.mat4();
+			push.normalMatrix = object.transform.normalMat4();
 
 			vkCmdPushConstants(
 				commandBuffer,
