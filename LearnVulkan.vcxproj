@@ -211,6 +211,7 @@
     <ClInclude Include="src\lv_buffer.hpp" />
     <ClInclude Include="src\lv_camera.hpp" />
     <ClInclude Include="src\lv_device.hpp" />
+    <ClInclude Include="src\lv_frame_data.hpp" />
     <ClInclude Include="src\lv_game_object.hpp" />
     <ClInclude Include="src\lv_model.hpp" />
     <ClInclude Include="src\lv_pipeline.hpp" />

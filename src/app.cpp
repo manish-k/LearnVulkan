@@ -64,6 +64,14 @@ namespace lv
 			{
 				int frameIndex = lvRenderer.getFrameIndex();
 
+				FrameData frameData
+				{
+					frameIndex,
+					frameTime,
+					commandBuffer,
+					camera
+				};
+
 				GlobalUbo ubo{};
 				ubo.prjoectionView = 
 					camera.getProjection() * camera.getView();
@@ -72,9 +80,8 @@ namespace lv
 
 				lvRenderer.beginSwapChainRenderPass(commandBuffer);
 				simpleRenderSystem.renderGameObjects(
-					commandBuffer, 
-					gameObjects, 
-					camera);
+					frameData, 
+					gameObjects);
 				lvRenderer.endSwapChainRenderPass(commandBuffer);
 				lvRenderer.endFrame();
 			}
