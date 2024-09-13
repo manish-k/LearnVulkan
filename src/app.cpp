@@ -56,9 +56,6 @@ namespace lv
 			float aspect = lvRenderer.getAspectRatio();
 			camera.setPerspectiveProjection(
 				glm::radians(50.f), aspect, 0.5f, 10.f);
-			//camera.setViewTarget(
-			//	glm::vec3(-1.f, -2.f, -2.f),
-			//	glm::vec3(0.f, 0.f, 2.5f));
 
 			if (auto commandBuffer = lvRenderer.beginFrame())
 			{
