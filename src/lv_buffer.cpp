@@ -58,7 +58,7 @@ namespace lv
 				device.getLogicalDevice(),
 				bufferMemory,
 				0,
-				bufferSize,
+				size,
 				0,
 				&mapped
 			);
