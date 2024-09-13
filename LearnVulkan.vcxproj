@@ -194,6 +194,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="src\app.cpp" />
     <ClCompile Include="src\input_controller.cpp" />
+    <ClCompile Include="src\lv_buffer.cpp" />
     <ClCompile Include="src\lv_camera.cpp" />
     <ClCompile Include="src\lv_device.cpp" />
     <ClCompile Include="src\lv_game_object.cpp" />
@@ -207,6 +208,7 @@
   <ItemGroup>
     <ClInclude Include="src\app.hpp" />
     <ClInclude Include="src\input_controller.hpp" />
+    <ClInclude Include="src\lv_buffer.hpp" />
     <ClInclude Include="src\lv_camera.hpp" />
     <ClInclude Include="src\lv_device.hpp" />
     <ClInclude Include="src\lv_game_object.hpp" />

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "lv_device.hpp"
+#include "lv_buffer.hpp"
 
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
@@ -65,13 +66,11 @@ namespace lv
 	private:
 		LvDevice& device;
 
-		VkBuffer vertexBuffer;
-		VkDeviceMemory vertexBufferMemory;
+		std::unique_ptr<LvBuffer> vertexBuffer;
 		uint32_t vertexCount;
 
 		bool hasIndexBuffer{ false };
-		VkBuffer indexBuffer;
-		VkDeviceMemory indexBufferMemory;
+		std::unique_ptr<LvBuffer> indexBuffer;
 		uint32_t indexCount;
 
 		void createVertexBuffers(const std::vector<Vertex> &vertices);
