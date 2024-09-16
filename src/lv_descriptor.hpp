@@ -2,8 +2,47 @@
 
 #include "lv_device.hpp"
 
+#include <memory>
+#include <vector>
+#include <unordered_map>
+
 namespace lv
 {
+    class LvDescriptorLayout
+    {
+    public:
+        class Builder
+        {
+        public:
+            Builder(LvDevice& lvDevice) : device{ lvDevice } {};
+            Builder& addBinding(
+                uint32_t bindingIndex,
+                VkDescriptorType descriptorType,
+                VkShaderStageFlags stageFlags,
+                uint32_t count = 1);
+            std::unique_ptr<LvDescriptorLayout> build() const;
+
+        private:
+            LvDevice& device;
+            std::unordered_map<uint32_t, VkDescriptorSetLayoutBinding>
+                bindings{};
+        };
+        
+        LvDescriptorLayout(
+            LvDevice& lvDevice,
+            std::unordered_map<uint32_t, VkDescriptorSetLayoutBinding>bindings);
+        ~LvDescriptorLayout();
+        LvDescriptorLayout(const LvDescriptorLayout&) = delete;
+        LvDescriptorLayout& operator=(const LvDescriptorLayout&) =
+            delete;
+    
+    private:
+        LvDevice& device;
+        VkDescriptorSetLayout descriptorSetLayout;
+        std::unordered_map<uint32_t, VkDescriptorSetLayoutBinding>
+            bindings;
+    };
+
     class LvDescriptorPool {
     public:
         class Builder {

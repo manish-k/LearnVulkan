@@ -1,7 +1,74 @@
 #include "lv_descriptor.hpp"
 
+#include <cassert>
+
 namespace lv
 {
+	// Descriptor Layout Builder
+
+	LvDescriptorLayout::Builder& LvDescriptorLayout::Builder::addBinding(
+		uint32_t bindingIndex,
+		VkDescriptorType descriptorType,
+		VkShaderStageFlags stageFlags,
+		uint32_t count)
+	{
+		assert(bindings.count(bindingIndex) == 0 && 
+			"binding already exists at the given index");
+
+		VkDescriptorSetLayoutBinding layoutBinding{};
+		layoutBinding.binding = bindingIndex;
+		layoutBinding.descriptorType = descriptorType;
+		layoutBinding.descriptorCount = count;
+		layoutBinding.stageFlags = stageFlags;
+		
+		bindings[bindingIndex] = layoutBinding;
+		return *this;
+	}
+
+	std::unique_ptr<LvDescriptorLayout> 
+		LvDescriptorLayout::Builder::build() const
+	{
+		return std::make_unique<LvDescriptorLayout>(
+			device,
+			bindings);
+	}
+
+	// Descriptor set layout
+
+	LvDescriptorLayout::LvDescriptorLayout(
+		LvDevice& lvDevice,
+		std::unordered_map<uint32_t, VkDescriptorSetLayoutBinding>bindings) 
+		: device{lvDevice}, bindings{bindings}
+	{
+		std::vector<VkDescriptorSetLayoutBinding> setLayoutBindings{};
+		for (auto &kv : bindings) {
+			setLayoutBindings.push_back(kv.second);
+		}
+
+		VkDescriptorSetLayoutCreateInfo descriptorSetLayoutInfo{};
+		descriptorSetLayoutInfo.sType =
+			VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+		descriptorSetLayoutInfo.bindingCount = 
+			static_cast<uint32_t>(setLayoutBindings.size());
+		descriptorSetLayoutInfo.pBindings = setLayoutBindings.data();
+
+		if (vkCreateDescriptorSetLayout(
+			device.getLogicalDevice(),
+			&descriptorSetLayoutInfo,
+			nullptr,
+			&descriptorSetLayout) != VK_SUCCESS) {
+			throw std::runtime_error(
+				"failed to create descriptor set layout!");
+		}
+	}
+
+	LvDescriptorLayout::~LvDescriptorLayout()
+	{
+		vkDestroyDescriptorSetLayout(
+			device.getLogicalDevice(),
+			descriptorSetLayout, nullptr);
+	}
+
 	// Descriptor pool builder
 
 	LvDescriptorPool::Builder& LvDescriptorPool::Builder::addPoolSize(
