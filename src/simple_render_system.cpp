@@ -9,10 +9,13 @@
 
 namespace lv
 {
-	SimpleRenderSystem::SimpleRenderSystem(LvDevice& device, VkRenderPass renderPass)
+	SimpleRenderSystem::SimpleRenderSystem(
+		LvDevice& device, 
+		VkRenderPass renderPass,
+		VkDescriptorSetLayout globalSetLayout)
 		: lvDevice{ device }
 	{
-		createPipelineLayout();
+		createPipelineLayout(globalSetLayout);
 		createPipeline(renderPass);
 	}
 
@@ -21,7 +24,8 @@ namespace lv
 		vkDestroyPipelineLayout(lvDevice.getLogicalDevice(), pipelineLayout, nullptr);
 	}
 
-	void SimpleRenderSystem::createPipelineLayout()
+	void SimpleRenderSystem::createPipelineLayout(
+		VkDescriptorSetLayout globalSetLayout)
 	{
 		VkPushConstantRange pushConstantRange{};
 		pushConstantRange.stageFlags =
@@ -29,11 +33,16 @@ namespace lv
 		pushConstantRange.offset = 0;
 		pushConstantRange.size = sizeof(SimplePushConstantsData);
 
+		std::vector<VkDescriptorSetLayout> descriptorSetLayouts{
+			globalSetLayout
+		};
+
 		VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
 		pipelineLayoutInfo.sType =
 			VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-		pipelineLayoutInfo.setLayoutCount = 0; // Optional
-		pipelineLayoutInfo.pSetLayouts = nullptr; // Optional
+		pipelineLayoutInfo.setLayoutCount = 
+			static_cast<uint32_t>(descriptorSetLayouts.size());
+		pipelineLayoutInfo.pSetLayouts = descriptorSetLayouts.data();
 		pipelineLayoutInfo.pushConstantRangeCount = 1;
 		pipelineLayoutInfo.pPushConstantRanges = &pushConstantRange;
 		if (vkCreatePipelineLayout(
@@ -69,12 +78,20 @@ namespace lv
 			frameData.camera.getProjection() * 
 			frameData.camera.getView();
 
+		vkCmdBindDescriptorSets(
+			frameData.commandBuffer,
+			VK_PIPELINE_BIND_POINT_GRAPHICS,
+			pipelineLayout,
+			0,
+			1,
+			&frameData.globalDescriptorSet,
+			0,
+			nullptr);
+
 		for (auto& object : gameObjects)
 		{
-			object.model->bind(frameData.commandBuffer);
-
 			SimplePushConstantsData push{};
-			push.transform = projectionView * object.transform.mat4();
+			push.modelMatrix = object.transform.mat4();
 			push.normalMatrix = object.transform.normalMat4();
 
 			vkCmdPushConstants(
@@ -85,6 +102,7 @@ namespace lv
 				sizeof(SimplePushConstantsData),
 				&push);
 
+			object.model->bind(frameData.commandBuffer);
 			object.model->draw(frameData.commandBuffer);
 		}
 	}

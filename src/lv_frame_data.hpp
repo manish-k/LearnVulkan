@@ -12,5 +12,6 @@ namespace lv
 		float frameTime;
 		VkCommandBuffer commandBuffer;
 		LvCamera& camera;
+		VkDescriptorSet globalDescriptorSet;
 	};
 }

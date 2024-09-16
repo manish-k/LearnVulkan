@@ -6,6 +6,7 @@
 #include "lv_swapchain.hpp"
 #include "lv_game_object.hpp"
 #include "lv_renderer.hpp"
+#include "lv_descriptor.hpp"
 
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
@@ -35,6 +36,8 @@ namespace lv
 		LvDevice lvDevice{lvWindow};
 		LvRenderer lvRenderer{ lvWindow, lvDevice };
 
+		std::unique_ptr<LvDescriptorPool> globalDescriptorPool 
+			= nullptr;
 		std::vector<LvGameObject> gameObjects;
 
 	public:

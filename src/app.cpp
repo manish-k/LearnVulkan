@@ -10,6 +10,12 @@ namespace lv
 {
 	App::App()
 	{
+		globalDescriptorPool = LvDescriptorPool::Builder(lvDevice)
+			.setMaxSets(LvSwapChain::MAX_FRAMES_IN_FLIGHT)
+			.addPoolSize(
+				VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 
+				LvSwapChain::MAX_FRAMES_IN_FLIGHT)
+			.build();
 		loadGameObjects();
 	}
 
@@ -19,7 +25,8 @@ namespace lv
 
 	void App::run()
 	{
-		std::vector<std::unique_ptr<LvBuffer>> uboBuffers(LvSwapChain::MAX_FRAMES_IN_FLIGHT);
+		std::vector<std::unique_ptr<LvBuffer>> 
+			uboBuffers(LvSwapChain::MAX_FRAMES_IN_FLIGHT);
 		for (int i = 0; i < uboBuffers.size(); i++) {
 			uboBuffers[i] = std::make_unique<LvBuffer>(
 				lvDevice,
@@ -30,7 +37,31 @@ namespace lv
 			uboBuffers[i]->map();
 		}
 
-		SimpleRenderSystem simpleRenderSystem{lvDevice, lvRenderer.getSwapChainRenderPass()};
+		auto globalSetLayout = 
+			LvDescriptorSetLayout::Builder(lvDevice)
+			.addBinding(
+				0,
+				VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+				VK_SHADER_STAGE_VERTEX_BIT)
+			.build();
+
+		// TODO: Do we need abstraction on VKDescriptorSet?
+		std::vector<VkDescriptorSet>
+			globalDescriptorSets(LvSwapChain::MAX_FRAMES_IN_FLIGHT);
+		for (int i = 0; i < globalDescriptorSets.size(); ++i)
+		{
+			auto bufferInfo = uboBuffers[i]->descriptorInfo();
+			LvDescriptorWriter(*globalSetLayout, *globalDescriptorPool)
+				.writeBuffer(0, &bufferInfo)
+				.build(globalDescriptorSets[i]);
+		}
+
+		SimpleRenderSystem simpleRenderSystem
+		{
+			lvDevice, 
+			lvRenderer.getSwapChainRenderPass(),
+			globalSetLayout->getDescriptorSetLayout()
+		};
 		LvCamera camera{};
 
 		auto viewerObject = LvGameObject::createGameObject();
@@ -66,7 +97,8 @@ namespace lv
 					frameIndex,
 					frameTime,
 					commandBuffer,
-					camera
+					camera,
+					globalDescriptorSets[frameIndex]
 				};
 
 				GlobalUbo ubo{};

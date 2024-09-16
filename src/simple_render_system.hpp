@@ -7,6 +7,8 @@
 #include "lv_camera.hpp"
 #include "lv_frame_data.hpp"
 
+#include <vulkan/vulkan.h>
+
 #include <memory>
 #include <vector>
 
@@ -14,7 +16,7 @@ namespace lv
 {
 	struct SimplePushConstantsData
 	{
-		glm::mat4 transform{ 1.f };
+		glm::mat4 modelMatrix{ 1.f };
 		glm::mat4 normalMatrix{ 1.f };
 	};
 
@@ -26,14 +28,19 @@ namespace lv
 		std::unique_ptr<LvPipeline> lvPipeline;
 
 	public:
-		SimpleRenderSystem(LvDevice& device, VkRenderPass renderPass);
+		SimpleRenderSystem(
+			LvDevice& device, 
+			VkRenderPass renderPass,
+			VkDescriptorSetLayout globalSetLayout);
 		~SimpleRenderSystem();
 		void renderGameObjects(
 			FrameData& frameData,
 			std::vector<LvGameObject>& gameObjects);
 
 	private:
-		void createPipeline(VkRenderPass renderPass);
-		void createPipelineLayout();
+		void createPipeline(
+			VkRenderPass renderPass);
+		void createPipelineLayout(
+			VkDescriptorSetLayout globalSetLayout);
 	};
 }
