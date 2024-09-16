@@ -6,7 +6,8 @@ namespace lv
 {
 	// Descriptor Layout Builder
 
-	LvDescriptorLayout::Builder& LvDescriptorLayout::Builder::addBinding(
+	LvDescriptorSetLayout::Builder& 
+		LvDescriptorSetLayout::Builder::addBinding(
 		uint32_t bindingIndex,
 		VkDescriptorType descriptorType,
 		VkShaderStageFlags stageFlags,
@@ -25,17 +26,17 @@ namespace lv
 		return *this;
 	}
 
-	std::unique_ptr<LvDescriptorLayout> 
-		LvDescriptorLayout::Builder::build() const
+	std::unique_ptr<LvDescriptorSetLayout>
+		LvDescriptorSetLayout::Builder::build() const
 	{
-		return std::make_unique<LvDescriptorLayout>(
+		return std::make_unique<LvDescriptorSetLayout>(
 			device,
 			bindings);
 	}
 
 	// Descriptor set layout
 
-	LvDescriptorLayout::LvDescriptorLayout(
+	LvDescriptorSetLayout::LvDescriptorSetLayout(
 		LvDevice& lvDevice,
 		std::unordered_map<uint32_t, VkDescriptorSetLayoutBinding>bindings) 
 		: device{lvDevice}, bindings{bindings}
@@ -62,7 +63,7 @@ namespace lv
 		}
 	}
 
-	LvDescriptorLayout::~LvDescriptorLayout()
+	LvDescriptorSetLayout::~LvDescriptorSetLayout()
 	{
 		vkDestroyDescriptorSetLayout(
 			device.getLogicalDevice(),
@@ -170,5 +171,77 @@ namespace lv
 	{
 		vkResetDescriptorPool(
 			device.getLogicalDevice(), descriptorPool, 0);
+	}
+
+	// Descriptor Writer
+
+	LvDescriptorWriter& LvDescriptorWriter::writeBuffer(
+		uint32_t binding, 
+		VkDescriptorBufferInfo* bufferInfo) {
+		assert(setLayout.bindings.count(binding) == 1 && 
+			"Layout does not contain specified binding");
+
+		auto& bindingDescription = setLayout.bindings[binding];
+
+		assert(
+			bindingDescription.descriptorCount == 1 &&
+			"Binding single descriptor info, but binding expects multiple");
+
+		// TODO: do we need buffer type check?
+
+		VkWriteDescriptorSet write{};
+		write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+		write.descriptorType = bindingDescription.descriptorType;
+		write.dstBinding = binding;
+		write.pBufferInfo = bufferInfo;
+		write.descriptorCount = 1;
+
+		writes.push_back(write);
+		return *this;
+	}
+
+	LvDescriptorWriter& LvDescriptorWriter::writeImage(
+		uint32_t binding, VkDescriptorImageInfo* imageInfo) {
+		assert(setLayout.bindings.count(binding) == 1 &&
+			"Layout does not contain specified binding");
+
+		auto& bindingDescription = setLayout.bindings[binding];
+
+		assert(
+			bindingDescription.descriptorCount == 1 &&
+			"Binding single descriptor info, but binding expects multiple");
+
+		VkWriteDescriptorSet write{};
+		write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+		write.descriptorType = bindingDescription.descriptorType;
+		write.dstBinding = binding;
+		write.pImageInfo = imageInfo;
+		write.descriptorCount = 1;
+
+		writes.push_back(write);
+		return *this;
+	}
+
+	bool LvDescriptorWriter::build(VkDescriptorSet& set) {
+		bool success = pool.allocateDescriptorSet(
+			setLayout.getDescriptorSetLayout(), 
+			set);
+		if (!success) {
+			return false;
+		}
+		overwrite(set);
+		return true;
+	}
+
+	void LvDescriptorWriter::overwrite(VkDescriptorSet& set) {
+		for (auto& write : writes) {
+			write.dstSet = set;
+		}
+		vkUpdateDescriptorSets(
+			pool.device.getLogicalDevice(), 
+			static_cast<uint32_t>(writes.size()), 
+			writes.data(), 
+			0, 
+			nullptr);
 	}
 }

@@ -8,7 +8,7 @@
 
 namespace lv
 {
-    class LvDescriptorLayout
+    class LvDescriptorSetLayout
     {
     public:
         class Builder
@@ -20,7 +20,7 @@ namespace lv
                 VkDescriptorType descriptorType,
                 VkShaderStageFlags stageFlags,
                 uint32_t count = 1);
-            std::unique_ptr<LvDescriptorLayout> build() const;
+            std::unique_ptr<LvDescriptorSetLayout> build() const;
 
         private:
             LvDevice& device;
@@ -28,19 +28,24 @@ namespace lv
                 bindings{};
         };
         
-        LvDescriptorLayout(
+        LvDescriptorSetLayout(
             LvDevice& lvDevice,
             std::unordered_map<uint32_t, VkDescriptorSetLayoutBinding>bindings);
-        ~LvDescriptorLayout();
-        LvDescriptorLayout(const LvDescriptorLayout&) = delete;
-        LvDescriptorLayout& operator=(const LvDescriptorLayout&) =
-            delete;
+        ~LvDescriptorSetLayout();
+        LvDescriptorSetLayout(const LvDescriptorSetLayout&) = delete;
+        LvDescriptorSetLayout& operator=(const LvDescriptorSetLayout&) 
+            = delete;
+
+        VkDescriptorSetLayout getDescriptorSetLayout() const 
+        { return descriptorSetLayout; }
     
     private:
         LvDevice& device;
         VkDescriptorSetLayout descriptorSetLayout;
         std::unordered_map<uint32_t, VkDescriptorSetLayoutBinding>
             bindings;
+
+        friend class LvDescriptorWriter;
     };
 
     class LvDescriptorPool {
@@ -85,5 +90,24 @@ namespace lv
         VkDescriptorPool descriptorPool;
 
         friend class LvDescriptorWriter;
+    };
+
+    class LvDescriptorWriter {
+    public:
+        LvDescriptorWriter(
+            LvDescriptorSetLayout& setLayout,
+            LvDescriptorPool& pool)
+            : setLayout{ setLayout }, pool{ pool } {};
+
+        LvDescriptorWriter& writeBuffer(uint32_t binding, VkDescriptorBufferInfo* bufferInfo);
+        LvDescriptorWriter& writeImage(uint32_t binding, VkDescriptorImageInfo* imageInfo);
+
+        bool build(VkDescriptorSet& set);
+        void overwrite(VkDescriptorSet& set);
+
+    private:
+        LvDescriptorSetLayout& setLayout;
+        LvDescriptorPool& pool;
+        std::vector<VkWriteDescriptorSet> writes;
     };
 }
