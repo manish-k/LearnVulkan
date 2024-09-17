@@ -1,6 +1,7 @@
 #include "app.hpp"
 
-#include "simple_render_system.hpp"
+#include "systems/simple_render_system.hpp"
+#include "systems/point_light_system.hpp"
 #include "input_controller.hpp"
 
 #include <array>
@@ -62,6 +63,13 @@ namespace lv
 			lvRenderer.getSwapChainRenderPass(),
 			globalSetLayout->getDescriptorSetLayout()
 		};
+		PointLightSystem pointLightSystem
+		{
+			lvDevice,
+			lvRenderer.getSwapChainRenderPass(),
+			globalSetLayout->getDescriptorSetLayout()
+		};
+
 		LvCamera camera{};
 
 		auto viewerObject = LvGameObject::createGameObject();
@@ -104,13 +112,14 @@ namespace lv
 				};
 
 				GlobalUbo ubo{};
-				ubo.prjoectionView = 
-					camera.getProjection() * camera.getView();
+				ubo.prjoection = camera.getProjection();
+				ubo.view = camera.getView();
 				uboBuffers[frameIndex]->writeToBuffer(&ubo);
 				uboBuffers[frameIndex]->flush();
 
 				lvRenderer.beginSwapChainRenderPass(commandBuffer);
 				simpleRenderSystem.renderGameObjects(frameData);
+				pointLightSystem.render(frameData);
 				lvRenderer.endSwapChainRenderPass(commandBuffer);
 				lvRenderer.endFrame();
 			}

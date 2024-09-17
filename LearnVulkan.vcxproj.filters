@@ -42,9 +42,6 @@
     <ClCompile Include="src\lv_renderer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\simple_render_system.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\lv_camera.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -52,6 +49,15 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\lv_buffer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\lv_descriptor.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\systems\simple_render_system.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\systems\point_light_system.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -80,9 +86,6 @@
     <ClInclude Include="src\lv_renderer.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\simple_render_system.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\lv_camera.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -98,6 +101,15 @@
     <ClInclude Include="src\lv_frame_data.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\lv_descriptor.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\systems\point_light_system.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\systems\simple_render_system.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\base_vert_shader.vert" />
@@ -105,5 +117,7 @@
     <None Include="compile_shader.bat">
       <Filter>Source Files</Filter>
     </None>
+    <None Include="shaders\point_light.vert" />
+    <None Include="shaders\point_light.frag" />
   </ItemGroup>
 </Project>
