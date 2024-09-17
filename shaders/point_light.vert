@@ -11,27 +11,36 @@ const vec2 OFFSETS[6] = vec2[](
 
 layout(location = 0) out vec2 fragOffset;
 
+struct PointLight
+{
+	vec4 position;
+	vec4 color; //w is for intensity
+};
 layout(set = 0, binding = 0) uniform GlobalUbo
 {
 	mat4 projection;
 	mat4 view;
 	vec4 ambientLightColor;
-	vec3 lightPosition;
-	vec4 lightColor;
+	PointLight pointLights[10]; // use specialisation constants of Vulkan
+	int numLights;
 } ubo;
 
-const float LIGHT_RADIUS = 0.05;
+layout(push_constant) uniform Push {
+  vec4 position;
+  vec4 color;
+  float radius;
+} push;
 
 void main()
 {
 	fragOffset = OFFSETS[gl_VertexIndex];
 
 	//camera space computation
-	vec4 lightCameraPos = ubo.view * vec4(ubo.lightPosition, 1.0);
+	vec4 lightCameraPos = ubo.view * vec4(push.position.xyz, 1.0);
 
 	vec3 positionCamera = lightCameraPos.xyz +
-		LIGHT_RADIUS * fragOffset.x * vec3(1.0, 0.0, 0.0) +
-		LIGHT_RADIUS * fragOffset.y * vec3(0.0, 1.0, 0.0);
+		push.radius * fragOffset.x * vec3(1.0, 0.0, 0.0) +
+		push.radius * fragOffset.y * vec3(0.0, 1.0, 0.0);
 
 	gl_Position = ubo.projection * vec4(positionCamera, 1.0f);
 

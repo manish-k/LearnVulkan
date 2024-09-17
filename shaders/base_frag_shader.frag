@@ -12,24 +12,38 @@ layout(push_constant) uniform Push
 	mat4 normalMatrix;
 } push;
 
+struct PointLight
+{
+	vec4 position;
+	vec4 color; //w is for intensity
+};
+
 layout(set = 0, binding = 0) uniform GlobalUbo
 {
 	mat4 projection;
 	mat4 view;
 	vec4 ambientLightColor;
-	vec3 lightPosition;
-	vec4 lightColor;
+	PointLight pointLights[10]; // use specialisation constants of Vulkan
+	int numLights;
 } ubo;
 
 void main()
 {
-	vec3 lightDirection = ubo.lightPosition - fragWorldPos;
+	vec3 diffuseColor = ubo.ambientLightColor.xyz * ubo.ambientLightColor.w;
+	vec3 surfaceNormal = normalize(fragNormal);
 
-	float attenuation = 1.0f / dot(lightDirection, lightDirection);
+	for (int i = 0; i < ubo.numLights; ++i)
+	{
+		vec3 lightDirection = ubo.pointLights[i].position.xyz - fragWorldPos;
 
-	vec3 lightColor = ubo.lightColor.xyz * ubo.lightColor.w * attenuation;
-	vec3 ambientColor = ubo.ambientLightColor.xyz * ubo.ambientLightColor.w;
-	vec3 diffuseColor = lightColor * max(dot(normalize(fragNormal), normalize(lightDirection)), 0);
+		float attenuation = 1.0f / dot(lightDirection, lightDirection);
 
-	outColor = vec4((ambientColor + diffuseColor) * fragColor, 1.0f);
+		vec3 lightColor = ubo.pointLights[i].color.xyz 
+			* ubo.pointLights[i].color.w 
+			* attenuation;
+		diffuseColor += lightColor 
+			* max(dot(surfaceNormal, normalize(lightDirection)), 0);
+	}
+	
+	outColor = vec4(diffuseColor * fragColor, 1.0f);
 }

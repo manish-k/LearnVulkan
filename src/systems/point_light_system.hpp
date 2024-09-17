@@ -27,6 +27,7 @@ namespace lv
 			VkRenderPass renderPass,
 			VkDescriptorSetLayout globalSetLayout);
 		~PointLightSystem();
+		void update(FrameData& frameData, GlobalUbo& ubo);
 		void render(FrameData& frameData);
 
 	private:

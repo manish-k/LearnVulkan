@@ -16,6 +16,11 @@ namespace lv
 		glm::mat4 normalMat4();
 	};
 
+	struct PointLightComponent
+	{
+		float lightIntensity = 1.0f;
+	};
+
 	class LvGameObject
 	{
 	public:
@@ -32,11 +37,18 @@ namespace lv
 		std::shared_ptr<LvModel> model{};
 		glm::vec3 color{};
 
+		std::unique_ptr<PointLightComponent> pointLight = nullptr;
+
 		static LvGameObject createGameObject()
 		{
 			static int currentId = 0;
 			return LvGameObject(currentId++);
 		}
+
+		static LvGameObject makePointLight(
+			float intensity = 10.f, 
+			float radius = 0.1f, 
+			glm::vec3 color = glm::vec3(1.f));
 
 		LvGameObject(const LvGameObject&) = delete;
 		LvGameObject& operator=(const LvGameObject&) = delete;
@@ -44,5 +56,6 @@ namespace lv
 		LvGameObject& operator=(LvGameObject&&) = default;
 
 		const id_t getId() { return id; };
+
 	};
 }
