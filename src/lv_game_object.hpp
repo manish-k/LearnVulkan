@@ -2,6 +2,8 @@
 
 #include "lv_model.hpp"
 
+#include <unordered_map>
+
 namespace lv
 {
 	struct TransformComponent
@@ -18,6 +20,7 @@ namespace lv
 	{
 	public:
 		using id_t = unsigned int;
+		using Map = std::unordered_map<id_t, LvGameObject>;
 
 	private:
 		id_t id;

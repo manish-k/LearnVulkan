@@ -69,8 +69,7 @@ namespace lv
 	}
 
 	void SimpleRenderSystem::renderGameObjects(
-		FrameData& frameData,
-		std::vector<LvGameObject>& gameObjects)
+		FrameData& frameData)
 	{
 		lvPipeline->bind(frameData.commandBuffer);
 
@@ -88,8 +87,10 @@ namespace lv
 			0,
 			nullptr);
 
-		for (auto& object : gameObjects)
+		for (auto& kv : frameData.gameObjects)
 		{
+			auto& object = kv.second;
+			if (object.model == nullptr) continue;
 			SimplePushConstantsData push{};
 			push.modelMatrix = object.transform.mat4();
 			push.normalMatrix = object.transform.normalMat4();

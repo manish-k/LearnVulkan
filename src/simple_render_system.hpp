@@ -33,9 +33,7 @@ namespace lv
 			VkRenderPass renderPass,
 			VkDescriptorSetLayout globalSetLayout);
 		~SimpleRenderSystem();
-		void renderGameObjects(
-			FrameData& frameData,
-			std::vector<LvGameObject>& gameObjects);
+		void renderGameObjects(FrameData& frameData);
 
 	private:
 		void createPipeline(

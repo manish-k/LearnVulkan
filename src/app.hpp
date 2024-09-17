@@ -39,7 +39,7 @@ namespace lv
 
 		std::unique_ptr<LvDescriptorPool> globalDescriptorPool 
 			= nullptr;
-		std::vector<LvGameObject> gameObjects;
+		LvGameObject::Map gameObjects;
 
 	public:
 		App();

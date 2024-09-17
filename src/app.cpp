@@ -99,7 +99,8 @@ namespace lv
 					frameTime,
 					commandBuffer,
 					camera,
-					globalDescriptorSets[frameIndex]
+					globalDescriptorSets[frameIndex],
+					gameObjects
 				};
 
 				GlobalUbo ubo{};
@@ -109,9 +110,7 @@ namespace lv
 				uboBuffers[frameIndex]->flush();
 
 				lvRenderer.beginSwapChainRenderPass(commandBuffer);
-				simpleRenderSystem.renderGameObjects(
-					frameData, 
-					gameObjects);
+				simpleRenderSystem.renderGameObjects(frameData);
 				lvRenderer.endSwapChainRenderPass(commandBuffer);
 				lvRenderer.endFrame();
 			}
@@ -130,7 +129,8 @@ namespace lv
 		gameObj1.model = model1;
 		gameObj1.transform.translation = { -1.f, .5f, 0.f };
 		gameObj1.transform.scale = glm::vec3{3.5f};
-		gameObjects.push_back(std::move(gameObj1));
+		gameObjects.emplace(
+			gameObj1.getId(), std::move(gameObj1));
 
 		std::shared_ptr<LvModel> model2 = LvModel::createModelFromFile(
 			lvDevice,
@@ -140,7 +140,8 @@ namespace lv
 		gameObj2.model = model2;
 		gameObj2.transform.translation = { .0f, .5f, 0.f };
 		gameObj2.transform.scale = glm::vec3{ 3.5f };
-		gameObjects.push_back(std::move(gameObj2));
+		gameObjects.emplace(
+			gameObj2.getId(), std::move(gameObj2));
 
 		std::shared_ptr<LvModel> model3 = LvModel::createModelFromFile(
 			lvDevice,
@@ -150,7 +151,8 @@ namespace lv
 		gameObj3.model = model3;
 		gameObj3.transform.translation = { 0.f, .5f, -1.5f };
 		gameObj3.transform.scale = { 3.f, 1.5f, 3.f };
-		gameObjects.push_back(std::move(gameObj3));
+		gameObjects.emplace(
+			gameObj3.getId(), std::move(gameObj3));
 
 		std::shared_ptr<LvModel> model4 = LvModel::createModelFromFile(
 			lvDevice,
@@ -160,6 +162,7 @@ namespace lv
 		floor.model = model4;
 		floor.transform.translation = { 0.f, .5f, 0.f };
 		floor.transform.scale = { 3.f, 1.5f, 3.f };
-		gameObjects.push_back(std::move(floor));
+		gameObjects.emplace(
+			floor.getId(), std::move(floor));
 	}
 }
