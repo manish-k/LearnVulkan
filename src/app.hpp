@@ -21,8 +21,9 @@ namespace lv
 	struct GlobalUbo
 	{
 		glm::mat4 prjoectionView{ 1.f };
-		glm::vec3 lightDirection = glm::normalize(
-			glm::vec3{ 1.f, -3.f, -1.f });
+		glm::vec4 ambientLightColor{1.f, 1.f, 1.f, 0.2f}; // w is intensity
+		glm::vec3 lightPosition{ -1.f };
+		alignas(16) glm::vec4 lightColor{ 1.f }; // rgb and intensity
 	};
 
 	class App
