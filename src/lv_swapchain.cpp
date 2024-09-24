@@ -445,8 +445,12 @@ namespace lv
 			imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 			imageInfo.flags = 0;
 
-			device.createImageWithInfo(
-				imageInfo,
+			device.createImage(
+				swapChainExtent.width,
+				swapChainExtent.height,
+				depthFormat,
+				VK_IMAGE_TILING_OPTIMAL,
+				VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
 				VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
 				depthImages[i],
 				depthImageMemorys[i]);

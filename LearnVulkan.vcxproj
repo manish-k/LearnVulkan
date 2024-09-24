@@ -203,6 +203,7 @@
     <ClCompile Include="src\lv_pipeline.cpp" />
     <ClCompile Include="src\lv_renderer.cpp" />
     <ClCompile Include="src\lv_swapchain.cpp" />
+    <ClCompile Include="src\lv_texture.cpp" />
     <ClCompile Include="src\lv_window.cpp" />
     <ClCompile Include="src\systems\point_light_system.cpp" />
     <ClCompile Include="src\systems\simple_render_system.cpp" />
@@ -220,6 +221,7 @@
     <ClInclude Include="src\lv_pipeline.hpp" />
     <ClInclude Include="src\lv_renderer.hpp" />
     <ClInclude Include="src\lv_swapchain.hpp" />
+    <ClInclude Include="src\lv_texture.hpp" />
     <ClInclude Include="src\lv_utils.hpp" />
     <ClInclude Include="src\lv_window.hpp" />
     <ClInclude Include="src\systems\point_light_system.hpp" />

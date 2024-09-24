@@ -79,19 +79,34 @@ namespace lv
 			VkBuffer &buffer,
 			VkDeviceMemory &bufferMemory
 		);
-
-		void createImageWithInfo(
-			const VkImageCreateInfo& imageInfo,
+		void createImage(
+			uint32_t width,
+			uint32_t height,
+			VkFormat format,
+			VkImageTiling tiling,
+			VkImageUsageFlags usage,
 			VkMemoryPropertyFlags properties,
 			VkImage& image,
 			VkDeviceMemory& imageMemory);
+		void transitionImageWithLayout(
+			VkImage image,
+			VkFormat format,
+			VkImageLayout oldLayout,
+			VkImageLayout newLayout);
 		VkFormat findSupportedFormat(
 			const std::vector<VkFormat>& candidates, VkImageTiling tiling, VkFormatFeatureFlags features);
-
 		void copyBuffer(
 			VkBuffer srcBuffer,
 			VkBuffer dstBuffer,
 			VkDeviceSize size);
+		void copyBufferToImage(
+			VkBuffer buffer,
+			VkImage image,
+			uint32_t width, 
+			uint32_t height);
+
+		VkCommandBuffer beginSingleTimeCommands();
+		void endSingleTimeCommands(VkCommandBuffer commandBuffer);
 
 	private:
 		void createVulkanInstance();
