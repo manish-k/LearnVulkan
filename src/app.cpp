@@ -131,6 +131,25 @@ namespace lv
 
 	void App::loadGameObjects()
 	{
+		std::shared_ptr<LvTexture> defaultTexture =
+			LvTexture::createTextureFromFile(
+				lvDevice,
+				"textures/default.png"
+			);
+
+		std::shared_ptr<LvTexture> statueTexture =
+			LvTexture::createTextureFromFile(
+				lvDevice,
+				"textures/statue.png"
+			);
+
+		std::shared_ptr<LvTexture> woodTexture =
+			LvTexture::createTextureFromFile(
+				lvDevice,
+				"textures/wood.png"
+			);
+
+		/*
 		std::shared_ptr<LvModel> model1 = LvModel::createModelFromFile(
 			lvDevice, 
 			"models/flat_vase.obj"
@@ -194,5 +213,29 @@ namespace lv
 			pointLight.transform.translation = glm::vec3(rotateLight * glm::vec4(-1.f, -0.5f, -1.f, 1.f));
 			gameObjects.emplace(pointLight.getId(), std::move(pointLight));
 		}
+		*/
+
+		std::shared_ptr<LvModel> roomModel = 
+			LvModel::createModelFromFile(
+				lvDevice,
+				"models/viking_room.obj"
+			);
+		std::shared_ptr<LvTexture> roomTexture = 
+			LvTexture::createTextureFromFile(
+				lvDevice,
+				"textures/viking_room.png"
+			);
+
+		auto room = LvGameObject::createGameObject();
+		room.model = roomModel;
+		room.texture = roomTexture;
+		room.transform.translation = { 0.f, 0.f, 0.f };
+		room.transform.scale = glm::vec3{ 2.f };
+		room.transform.rotation = {
+			glm::half_pi<float>(),
+			glm::half_pi<float>(), 
+			0.f };
+		gameObjects.emplace(
+			room.getId(), std::move(room));
 	}
 }

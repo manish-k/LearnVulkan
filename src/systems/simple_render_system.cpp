@@ -1,4 +1,5 @@
 #include "simple_render_system.hpp"
+#include "lv_descriptor.hpp"
 
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
@@ -6,6 +7,7 @@
 #include <glm/gtc/constants.hpp>
 
 #include <array>
+#include <cassert>
 
 namespace lv
 {
@@ -15,18 +17,46 @@ namespace lv
 		VkDescriptorSetLayout globalSetLayout)
 		: lvDevice{ device }
 	{
+		localDescriptorPool = LvDescriptorPool::Builder(device)
+			.setMaxSets(LvSwapChain::MAX_FRAMES_IN_FLIGHT)
+			.addPoolSize(
+				VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+				LvSwapChain::MAX_FRAMES_IN_FLIGHT)
+			.build();
+
+		localDescriptorSetLayout = LvDescriptorSetLayout::Builder(device)
+			.addBinding(
+				0,
+				VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+				VK_SHADER_STAGE_FRAGMENT_BIT)
+			.build();
+
+		localDescriptorSets.resize(LvSwapChain::MAX_FRAMES_IN_FLIGHT);
+		for (int i = 0; i < localDescriptorSets.size(); ++i)
+		{
+			// TODO check status of build function
+			LvDescriptorWriter(
+				*localDescriptorSetLayout, 
+				*localDescriptorPool
+			).build(localDescriptorSets[i]);
+		}
+
 		createPipelineLayout(globalSetLayout);
 		createPipeline(renderPass);
 	}
 
 	SimpleRenderSystem::~SimpleRenderSystem()
 	{
-		vkDestroyPipelineLayout(lvDevice.getLogicalDevice(), pipelineLayout, nullptr);
+		vkDestroyPipelineLayout(
+			lvDevice.getLogicalDevice(), pipelineLayout, nullptr);
 	}
 
 	void SimpleRenderSystem::createPipelineLayout(
 		VkDescriptorSetLayout globalSetLayout)
 	{
+		assert(localDescriptorSetLayout != VK_NULL_HANDLE 
+			&& "local descriptor set layout is not present");
+
 		VkPushConstantRange pushConstantRange{};
 		pushConstantRange.stageFlags =
 			VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
@@ -34,7 +64,8 @@ namespace lv
 		pushConstantRange.size = sizeof(SimplePushConstantsData);
 
 		std::vector<VkDescriptorSetLayout> descriptorSetLayouts{
-			globalSetLayout
+			globalSetLayout,
+			localDescriptorSetLayout->getDescriptorSetLayout()
 		};
 
 		VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
@@ -74,10 +105,10 @@ namespace lv
 		lvPipeline->bind(frameData.commandBuffer);
 
 		vkCmdBindDescriptorSets(
-			frameData.commandBuffer,
+			frameData.commandBuffer, 
 			VK_PIPELINE_BIND_POINT_GRAPHICS,
 			pipelineLayout,
-			0,
+			0, 
 			1,
 			&frameData.globalDescriptorSet,
 			0,
@@ -98,6 +129,29 @@ namespace lv
 				0,
 				sizeof(SimplePushConstantsData),
 				&push);
+
+			if (object.texture != nullptr)
+			{
+				auto imageInfo = object.texture->descriptorInfo();
+				LvDescriptorWriter(
+					*localDescriptorSetLayout,
+					*localDescriptorPool)
+					.writeImage(
+						0, 
+						VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 
+						&imageInfo)
+					.overwrite(localDescriptorSets[frameData.frameIndex]);
+
+				vkCmdBindDescriptorSets(
+					frameData.commandBuffer,
+					VK_PIPELINE_BIND_POINT_GRAPHICS,
+					pipelineLayout,
+					1,
+					1,
+					&localDescriptorSets[frameData.frameIndex],
+					0,
+					nullptr);
+			}
 
 			object.model->bind(frameData.commandBuffer);
 			object.model->draw(frameData.commandBuffer);

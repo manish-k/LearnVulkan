@@ -3,8 +3,6 @@
 #include "lv_device.hpp"
 
 #include <vulkan/vulkan.h>
-#define STB_IMAGE_IMPLEMENTATION
-#include <stb_image.h>
 
 #include <memory>
 
@@ -16,7 +14,7 @@ namespace lv
 		struct Builder
 		{
 			int texWidth, texHeight, texChannels;
-			stbi_uc* pixels = nullptr;
+			void* pixels = nullptr;
 			void loadTexture(const std::string& filepath);
 			void unloadTexture();
 		};
@@ -26,9 +24,13 @@ namespace lv
 
 		VkImage textureImage = VK_NULL_HANDLE;
 		VkDeviceMemory textureImageMemory = VK_NULL_HANDLE;
+		VkImageView textureImageView = VK_NULL_HANDLE;
+		VkSampler textureSampler = VK_NULL_HANDLE;
 
 		int width;
 		int height;
+
+		void createTextureSampler();
 
 	public:
 		LvTexture(LvDevice& device, const Builder& builder);
@@ -42,6 +44,7 @@ namespace lv
 			const std::string& filepath);
 
 		VkImage getImage() const { return textureImage; }
+		VkDescriptorImageInfo descriptorInfo();
 		void* getMappedMemory() const { return textureImageMemory; }
 	};
 }

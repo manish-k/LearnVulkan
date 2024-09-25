@@ -1,6 +1,7 @@
 #pragma once
 
 #include "lv_model.hpp"
+#include "lv_texture.hpp"
 
 #include <unordered_map>
 
@@ -35,6 +36,7 @@ namespace lv
 	public:
 		TransformComponent transform{};
 		std::shared_ptr<LvModel> model{};
+		std::shared_ptr<LvTexture> texture{};
 		glm::vec3 color{};
 
 		std::unique_ptr<PointLightComponent> pointLight = nullptr;

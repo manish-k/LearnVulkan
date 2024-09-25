@@ -88,6 +88,7 @@ namespace lv
 			VkMemoryPropertyFlags properties,
 			VkImage& image,
 			VkDeviceMemory& imageMemory);
+		VkImageView createImageView(VkImage image, VkFormat format);
 		void transitionImageWithLayout(
 			VkImage image,
 			VkFormat format,

@@ -201,7 +201,9 @@ namespace lv
 	}
 
 	LvDescriptorWriter& LvDescriptorWriter::writeImage(
-		uint32_t binding, VkDescriptorImageInfo* imageInfo) {
+		uint32_t binding,
+		VkDescriptorType type,
+		VkDescriptorImageInfo* imageInfo) {
 		assert(setLayout.bindings.count(binding) == 1 &&
 			"Layout does not contain specified binding");
 
@@ -217,6 +219,7 @@ namespace lv
 		write.dstBinding = binding;
 		write.pImageInfo = imageInfo;
 		write.descriptorCount = 1;
+		write.descriptorType = type;
 
 		writes.push_back(write);
 		return *this;
@@ -234,6 +237,8 @@ namespace lv
 	}
 
 	void LvDescriptorWriter::overwrite(VkDescriptorSet& set) {
+		if (writes.empty()) return;
+
 		for (auto& write : writes) {
 			write.dstSet = set;
 		}

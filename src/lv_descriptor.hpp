@@ -99,8 +99,12 @@ namespace lv
             LvDescriptorPool& pool)
             : setLayout{ setLayout }, pool{ pool } {};
 
-        LvDescriptorWriter& writeBuffer(uint32_t binding, VkDescriptorBufferInfo* bufferInfo);
-        LvDescriptorWriter& writeImage(uint32_t binding, VkDescriptorImageInfo* imageInfo);
+        LvDescriptorWriter& writeBuffer(
+            uint32_t binding, VkDescriptorBufferInfo* bufferInfo);
+        LvDescriptorWriter& writeImage(
+            uint32_t binding,
+            VkDescriptorType type,
+            VkDescriptorImageInfo* imageInfo);
 
         bool build(VkDescriptorSet& set);
         void overwrite(VkDescriptorSet& set);

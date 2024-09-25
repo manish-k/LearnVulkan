@@ -228,6 +228,9 @@ namespace lv
 
 		bool allDeviceExtensionSupported = checkDeviceExtensionSupport(device);
 
+		VkPhysicalDeviceFeatures supportedFeatures;
+		vkGetPhysicalDeviceFeatures(device, &supportedFeatures);
+
 		bool swapChainAdequate = false;
 		if (allDeviceExtensionSupported)
 		{
@@ -238,7 +241,8 @@ namespace lv
 		
 		return indicesComplte
 			&& allDeviceExtensionSupported
-			&& swapChainAdequate;
+			&& swapChainAdequate
+			&& supportedFeatures.samplerAnisotropy;
 	}
 
 	void LvDevice::pickPhysicalDevice()
@@ -543,6 +547,27 @@ namespace lv
 		}
 	}
 
+	VkImageView LvDevice::createImageView(VkImage image, VkFormat format)
+	{
+		VkImageViewCreateInfo viewInfo{};
+		viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+		viewInfo.image = image;
+		viewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
+		viewInfo.format = format;
+		viewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+		viewInfo.subresourceRange.baseMipLevel = 0;
+		viewInfo.subresourceRange.levelCount = 1;
+		viewInfo.subresourceRange.baseArrayLayer = 0;
+		viewInfo.subresourceRange.layerCount = 1;
+
+		VkImageView imageView;
+		if (vkCreateImageView(device, &viewInfo, nullptr, &imageView) != VK_SUCCESS) {
+			throw std::runtime_error("failed to create texture image view");
+		}
+
+		return imageView;
+	}
+
 	void LvDevice::transitionImageWithLayout(
 		VkImage image,
 		VkFormat format,
@@ -557,6 +582,12 @@ namespace lv
 		barrier.newLayout = newLayout;
 		barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
 		barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+		barrier.image = image;
+		barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+		barrier.subresourceRange.baseMipLevel = 0;
+		barrier.subresourceRange.levelCount = 1;
+		barrier.subresourceRange.baseArrayLayer = 0;
+		barrier.subresourceRange.layerCount = 1;
 
 		VkPipelineStageFlags sourceStage;
 		VkPipelineStageFlags destinationStage;

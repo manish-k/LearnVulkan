@@ -6,6 +6,7 @@
 #include "lv_game_object.hpp"
 #include "lv_camera.hpp"
 #include "lv_frame_data.hpp"
+#include "lv_descriptor.hpp"
 
 #include <vulkan/vulkan.h>
 
@@ -26,6 +27,12 @@ namespace lv
 		LvDevice& lvDevice;
 		VkPipelineLayout pipelineLayout;
 		std::unique_ptr<LvPipeline> lvPipeline;
+
+		std::unique_ptr<LvDescriptorPool> localDescriptorPool
+			= nullptr;
+		std::unique_ptr<LvDescriptorSetLayout> localDescriptorSetLayout
+			= nullptr;
+		std::vector<VkDescriptorSet> localDescriptorSets;
 
 	public:
 		SimpleRenderSystem(
